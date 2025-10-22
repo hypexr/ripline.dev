@@ -141,16 +141,19 @@ function bbsModemLoad() {
 
     function processNextElement() {
         if (elementIndex >= allElements.length) {
-            // Mark terminal line as loaded so cursor blinks
-            const terminalLine = document.querySelector('div.terminal-line:last-of-type');
-            if (terminalLine) {
-                terminalLine.classList.add('loaded');
-            }
             return;
         }
 
         const el = allElements[elementIndex];
         elementIndex++;
+
+        // Skip the last terminal-line (contains the blinking cursor)
+        if (el.classList.contains('terminal-line') && el.querySelector('.cursor')) {
+            // Just make it visible without processing
+            el.style.visibility = 'visible';
+            processNextElement();
+            return;
+        }
 
         // Skip if element is empty or only whitespace
         if (!el.textContent.trim()) {
