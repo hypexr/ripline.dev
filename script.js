@@ -341,16 +341,7 @@ function setupClickHandlers() {
         }
     }
 
-    // Make entire terminal content clickable to activate
-    const terminalContent = document.querySelector('.terminal-content');
-    if (terminalContent) {
-        terminalContent.addEventListener('click', (e) => {
-            activateTerminal();
-            e.stopPropagation();
-        });
-    }
-
-    // Handle clicks outside terminal to deactivate
+    // Handle clicks to activate/deactivate terminal
     document.addEventListener('click', (e) => {
         const terminalContent = document.querySelector('.terminal-content');
 
@@ -360,22 +351,78 @@ function setupClickHandlers() {
             return;
         }
 
+        // Check if clicked directly on ASCII logo or it's a parent
+        if (e.target.classList.contains('ascii-logo') || e.target.closest('.ascii-logo')) {
+            deactivateTerminal(); // Deactivate if clicking on logo
+            return;
+        }
+
+        // Check if clicked on text elements or content
+        if (e.target.classList.contains('content-section') || e.target.closest('.content-section')) {
+            // Get the element that was actually clicked
+            const clickedElement = e.target;
+
+            // If clicking on actual text elements (H2, P, A, etc), deactivate
+            if (['H2', 'H3', 'P', 'A', 'SPAN'].includes(clickedElement.tagName) ||
+                clickedElement.classList.contains('project')) {
+                deactivateTerminal();
+                return;
+            }
+
+            // If clicking on the content-section div itself (whitespace/padding), check position
+            const contentSection = clickedElement.classList.contains('content-section')
+                ? clickedElement
+                : clickedElement.closest('.content-section');
+
+            if (contentSection) {
+                const contentSections = document.querySelectorAll('.content-section');
+                const lastContentSection = contentSections[contentSections.length - 1];
+
+                // Only activate if clicking on the last content section's whitespace
+                if (contentSection === lastContentSection) {
+                    activateTerminal();
+                    return;
+                } else {
+                    deactivateTerminal();
+                    return;
+                }
+            }
+        }
+
         // If click is outside terminal content, deactivate
         if (terminalContent && !terminalContent.contains(e.target)) {
             deactivateTerminal();
         } else if (terminalContent && terminalContent.contains(e.target)) {
-            // Don't activate if clicking on text content elements
-            const clickedElement = e.target;
-            const isTextElement = ['P', 'H2', 'H3', 'SPAN', 'PRE'].includes(clickedElement.tagName);
-            const isProjectDiv = clickedElement.classList.contains('project');
+            // Check if clicking on terminal-line or below content sections
+            // This allows activation in the space right under email and on the prompt line
+            const terminalLine = document.querySelector('.terminal-line');
 
-            // Activate terminal if clicking on:
-            // - terminal-content itself
-            // - content-section (whitespace areas)
-            // - terminal-line or its children
-            // But NOT on text elements (P, H2, H3, etc.) or project divs
-            if (!isTextElement && !isProjectDiv) {
+            if (terminalLine && (e.target === terminalLine || terminalLine.contains(e.target))) {
+                // Clicking directly on the terminal line - activate
                 activateTerminal();
+            } else {
+                // Check if click is in the empty space below content sections
+                const contentSections = document.querySelectorAll('.content-section');
+                const lastContentSection = contentSections[contentSections.length - 1];
+
+                if (lastContentSection) {
+                    const clickY = e.clientY;
+
+                    // Get the top of the last content section
+                    const lastSectionTop = lastContentSection.getBoundingClientRect().top;
+
+                    // Activate if click is below the top of the last content section
+                    // This allows clicking anywhere in or below the contact section
+                    if (clickY >= lastSectionTop) {
+                        activateTerminal();
+                    } else {
+                        // Click is above the last content section - deactivate
+                        deactivateTerminal();
+                    }
+                } else {
+                    // No content sections found, activate anywhere
+                    activateTerminal();
+                }
             }
         }
     });
