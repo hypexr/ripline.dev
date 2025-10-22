@@ -155,6 +155,12 @@ body {
 /* Blinking cursor */
 .cursor {
     animation: blink 1s step-end infinite;
+    display: none;
+}
+
+/* Show cursor when terminal is active */
+.cursor.active {
+    display: inline;
 }
 
 @keyframes blink {

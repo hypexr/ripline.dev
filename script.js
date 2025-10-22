@@ -207,6 +207,7 @@ function initTerminalInput() {
     const terminalLine = document.querySelector('div.terminal-line:last-of-type');
     const cursor = terminalLine.querySelector('.cursor');
     let inputText = '';
+    let isActive = false;
 
     // Create a span to hold the typed text
     const inputSpan = document.createElement('span');
@@ -214,8 +215,19 @@ function initTerminalInput() {
     terminalLine.insertBefore(inputSpan, cursor);
     terminalLine.insertBefore(document.createTextNode(' '), cursor);
 
+    // Activate terminal on click
+    terminalLine.addEventListener('click', () => {
+        if (!isActive) {
+            isActive = true;
+            cursor.classList.add('active');
+        }
+    });
+
     // Handle keyboard input
     document.addEventListener('keydown', (e) => {
+        // Only handle input if terminal is active
+        if (!isActive) return;
+
         // Prevent default for terminal-related keys
         if (e.key === 'Backspace' || e.key === 'Enter' || e.key.length === 1) {
             e.preventDefault();
@@ -235,9 +247,6 @@ function initTerminalInput() {
             inputSpan.textContent = inputText;
         }
     });
-
-    // Focus the page to capture keyboard input
-    window.focus();
 }
 
 // Initialize everything when DOM is ready
