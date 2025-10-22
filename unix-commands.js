@@ -187,6 +187,22 @@ class UnixEmulator {
         return { user: 'root', group: 'root' };
     }
 
+    // Check if current user has write permission to a path
+    canWrite(path) {
+        // Root can write anywhere
+        if (this.currentUser === 'root') {
+            return true;
+        }
+
+        // kmitnick can only write in their home directory
+        if (this.currentUser === 'kmitnick') {
+            const fullPath = this.resolvePath(path);
+            return fullPath.startsWith('/home/user/kmitnick');
+        }
+
+        return false;
+    }
+
     // Helper: Navigate filesystem
     resolvePath(path) {
         // Expand ~ to home directory
@@ -245,7 +261,7 @@ class UnixEmulator {
   touch [file]  - Create an empty file
   rm [file]     - Remove a file
   tree          - Display directory tree
-  su [user]     - Switch user (default: root)
+  vi/vim [file] - Edit a file
   exit          - Return to previous user session
 
 Type any command to try it out!`;
@@ -437,6 +453,12 @@ Type any command to try it out!`;
             }
 
             const path = this.resolvePath(args[0]);
+
+            // Check write permission
+            if (!this.canWrite(path)) {
+                return `mkdir: cannot create directory '${args[0]}': Permission denied`;
+            }
+
             const parts = path.split('/').filter(p => p);
             const dirName = parts.pop();
             const parentPath = '/' + parts.join('/');
@@ -465,6 +487,12 @@ Type any command to try it out!`;
             }
 
             const path = this.resolvePath(args[0]);
+
+            // Check write permission
+            if (!this.canWrite(path)) {
+                return `touch: cannot touch '${args[0]}': Permission denied`;
+            }
+
             const parts = path.split('/').filter(p => p);
             const fileName = parts.pop();
             const parentPath = '/' + parts.join('/');
@@ -490,23 +518,138 @@ Type any command to try it out!`;
                 return 'rm: missing operand';
             }
 
-            const path = this.resolvePath(args[0]);
-            const parts = path.split('/').filter(p => p);
-            const fileName = parts.pop();
-            const parentPath = '/' + parts.join('/');
-            const parent = this.getNode(parentPath);
+            // Parse flags
+            let recursive = false;
+            let force = false;
+            let verbose = false;
+            const targets = [];
 
-            if (!parent || !(fileName in parent)) {
-                return `rm: cannot remove '${args[0]}': No such file or directory`;
+            for (const arg of args) {
+                if (arg.startsWith('-')) {
+                    if (arg.includes('r') || arg.includes('R')) recursive = true;
+                    if (arg.includes('f')) force = true;
+                    if (arg.includes('v')) verbose = true;
+                } else {
+                    targets.push(arg);
+                }
             }
 
-            if (typeof parent[fileName] === 'object') {
-                return `rm: cannot remove '${args[0]}': Is a directory`;
+            if (targets.length === 0) {
+                return 'rm: missing operand';
             }
 
-            delete parent[fileName];
+            const errors = [];
+            const removed = [];
+
+            // Process each target
+            for (const target of targets) {
+                // Check for wildcards
+                if (target.includes('*')) {
+                    // Handle wildcard matching
+                    const dirPath = target.includes('/') ? target.substring(0, target.lastIndexOf('/')) : '.';
+                    const pattern = target.includes('/') ? target.substring(target.lastIndexOf('/') + 1) : target;
+
+                    const resolvedDir = this.resolvePath(dirPath);
+                    const parentNode = this.getNode(resolvedDir);
+
+                    if (!parentNode || typeof parentNode !== 'object') {
+                        if (!force) {
+                            errors.push(`rm: cannot remove '${target}': No such file or directory`);
+                        }
+                        continue;
+                    }
+
+                    // Convert wildcard pattern to regex
+                    const regexPattern = '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$';
+                    const regex = new RegExp(regexPattern);
+
+                    // Find matching files/directories
+                    const matches = Object.keys(parentNode).filter(name => regex.test(name));
+
+                    if (matches.length === 0 && !force) {
+                        errors.push(`rm: cannot remove '${target}': No such file or directory`);
+                        continue;
+                    }
+
+                    // Remove each match
+                    for (const match of matches) {
+                        const matchPath = resolvedDir === '/' ? `/${match}` : `${resolvedDir}/${match}`;
+
+                        // Check write permission
+                        if (!this.canWrite(matchPath)) {
+                            if (!force) {
+                                errors.push(`rm: cannot remove '${match}': Permission denied`);
+                            }
+                            continue;
+                        }
+
+                        const isDir = typeof parentNode[match] === 'object';
+
+                        if (isDir && !recursive) {
+                            if (!force) {
+                                errors.push(`rm: cannot remove '${match}': Is a directory`);
+                            }
+                            continue;
+                        }
+
+                        delete parentNode[match];
+                        if (verbose) {
+                            removed.push(`removed '${dirPath === '.' ? match : dirPath + '/' + match}'`);
+                        }
+                    }
+                } else {
+                    // Single file/directory removal
+                    const path = this.resolvePath(target);
+
+                    // Check write permission
+                    if (!this.canWrite(path)) {
+                        if (!force) {
+                            errors.push(`rm: cannot remove '${target}': Permission denied`);
+                        }
+                        continue;
+                    }
+
+                    const parts = path.split('/').filter(p => p);
+                    const fileName = parts.pop();
+                    const parentPath = '/' + parts.join('/');
+                    const parent = this.getNode(parentPath);
+
+                    if (!parent || !(fileName in parent)) {
+                        if (!force) {
+                            errors.push(`rm: cannot remove '${target}': No such file or directory`);
+                        }
+                        continue;
+                    }
+
+                    const isDir = typeof parent[fileName] === 'object';
+
+                    if (isDir && !recursive) {
+                        if (!force) {
+                            errors.push(`rm: cannot remove '${target}': Is a directory`);
+                        }
+                        continue;
+                    }
+
+                    delete parent[fileName];
+                    if (verbose) {
+                        removed.push(`removed '${target}'`);
+                    }
+                }
+            }
+
             this.persistFileSystem();
-            return '';
+
+            // Build output
+            let output = '';
+            if (verbose && removed.length > 0) {
+                output = removed.join('\n');
+            }
+            if (errors.length > 0) {
+                if (output) output += '\n';
+                output += errors.join('\n');
+            }
+
+            return output;
         },
 
         tree: () => {

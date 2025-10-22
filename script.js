@@ -310,6 +310,12 @@ function setupClickHandlers() {
         if (cursor) {
             currentTerminalLine = terminalLine;
             currentCursor = cursor;
+
+            // Create input span for typed text
+            const inputSpan = document.createElement('span');
+            inputSpan.className = 'terminal-input';
+            terminalLine.insertBefore(inputSpan, cursor);
+            currentInputSpan = inputSpan;
         }
     }
 
@@ -353,38 +359,7 @@ function setupClickHandlers() {
     });
 }
 
-function initTerminalInput() {
-    const terminalLine = document.querySelector('div.terminal-line:last-of-type');
-    const cursor = terminalLine.querySelector('.cursor');
-    const prompt = terminalLine.querySelector('.prompt');
-
-    // Update prompt with current user and directory
-    if (prompt && unixEmulator) {
-        const currentUser = unixEmulator.getCurrentUser();
-        let currentDir = unixEmulator.getCurrentPath();
-        const homeDir = unixEmulator.environment.HOME;
-
-        // Replace home directory with ~
-        if (currentDir === homeDir) {
-            currentDir = '~';
-        } else if (currentDir.startsWith(homeDir + '/')) {
-            currentDir = '~' + currentDir.substring(homeDir.length);
-        }
-
-        const promptChar = currentUser === 'root' ? '#' : '$';
-        prompt.textContent = `${currentUser}@ripline:${currentDir}${promptChar}`;
-    }
-
-    // Create a span to hold the typed text
-    const inputSpan = document.createElement('span');
-    inputSpan.className = 'terminal-input';
-    terminalLine.insertBefore(inputSpan, cursor);
-
-    // Set current references
-    currentTerminalLine = terminalLine;
-    currentInputSpan = inputSpan;
-    currentCursor = cursor;
-
+function setupKeyboardHandlers() {
     // Handle keyboard input
     document.addEventListener('keydown', (e) => {
         // Only handle input if terminal is active
@@ -397,10 +372,12 @@ function initTerminalInput() {
 
         if (e.key === 'Backspace') {
             inputText = inputText.slice(0, -1);
-            currentInputSpan.textContent = inputText;
+            if (currentInputSpan) {
+                currentInputSpan.textContent = inputText;
+            }
         } else if (e.key === 'Tab') {
             // Tab completion
-            if (!inputText.trim()) return;
+            if (!inputText.trim() || !unixEmulator) return;
 
             const completions = unixEmulator.getCompletions(inputText);
 
@@ -426,7 +403,9 @@ function initTerminalInput() {
                     inputText = parts.join(' ');
                 }
 
-                currentInputSpan.textContent = inputText;
+                if (currentInputSpan) {
+                    currentInputSpan.textContent = inputText;
+                }
             } else if (completions.matches.length > 1) {
                 // Multiple matches - show them
                 const matchList = completions.matches.join('  ');
@@ -434,11 +413,15 @@ function initTerminalInput() {
             }
         } else if (e.key === 'Enter') {
             // Execute the command
+            if (!unixEmulator) return;
+
             const output = unixEmulator.execute(inputText);
 
             // Remove cursor from current line
-            currentCursor.classList.remove('active');
-            currentCursor.style.display = 'none';
+            if (currentCursor) {
+                currentCursor.classList.remove('active');
+                currentCursor.style.display = 'none';
+            }
 
             // Display command output
             displayCommandOutput(output);
@@ -451,9 +434,42 @@ function initTerminalInput() {
         } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
             // Regular character
             inputText += e.key;
-            currentInputSpan.textContent = inputText;
+            if (currentInputSpan) {
+                currentInputSpan.textContent = inputText;
+            }
         }
     });
+}
+
+function initTerminalInput() {
+    const terminalLine = document.querySelector('div.terminal-line:last-of-type');
+    const prompt = terminalLine.querySelector('.prompt');
+
+    // Update prompt with current user and directory
+    if (prompt && unixEmulator) {
+        const currentUser = unixEmulator.getCurrentUser();
+        let currentDir = unixEmulator.getCurrentPath();
+        const homeDir = unixEmulator.environment.HOME;
+
+        // Replace home directory with ~
+        if (currentDir === homeDir) {
+            currentDir = '~';
+        } else if (currentDir.startsWith(homeDir + '/')) {
+            currentDir = '~' + currentDir.substring(homeDir.length);
+        }
+
+        const promptChar = currentUser === 'root' ? '#' : '$';
+        prompt.textContent = `${currentUser}@ripline:${currentDir}${promptChar}`;
+    }
+
+    // References are already set up by setupClickHandlers, just verify they exist
+    if (!currentInputSpan) {
+        const cursor = terminalLine.querySelector('.cursor');
+        const inputSpan = document.createElement('span');
+        inputSpan.className = 'terminal-input';
+        terminalLine.insertBefore(inputSpan, cursor);
+        currentInputSpan = inputSpan;
+    }
 }
 
 // Initialize everything when DOM is ready
@@ -468,8 +484,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Set up click handlers immediately so terminal can be activated right away
+    // Set up click and keyboard handlers immediately so terminal can be used right away
     setupClickHandlers();
+    setupKeyboardHandlers();
 
     // BBS modem loading effect
     bbsModemLoad();
