@@ -180,7 +180,17 @@ function bbsModemLoad() {
             if (charIndex < originalText.length) {
                 el.textContent += originalText[charIndex];
                 charIndex++;
-                setTimeout(typeNextChar, charDelay);
+
+                // Use requestAnimationFrame with manual delay tracking for consistent timing
+                const startTime = performance.now();
+                function rafWait() {
+                    if (performance.now() - startTime >= charDelay) {
+                        typeNextChar();
+                    } else {
+                        requestAnimationFrame(rafWait);
+                    }
+                }
+                requestAnimationFrame(rafWait);
             } else {
                 // Move to next element after a brief pause
                 setTimeout(processNextElement, 20);
