@@ -203,11 +203,66 @@ function bbsModemLoad() {
 }
 
 // Terminal input handler
+let currentTerminalLine = null;
+let currentInputSpan = null;
+let currentCursor = null;
+let inputText = '';
+let isActive = false;
+
+function createNewTerminalLine() {
+    const terminalContent = document.querySelector('.terminal-content');
+
+    // Create new terminal line
+    const newLine = document.createElement('div');
+    newLine.className = 'terminal-line';
+    newLine.style.visibility = 'visible';
+
+    // Create prompt
+    const prompt = document.createElement('span');
+    prompt.className = 'prompt';
+    prompt.textContent = 'root@ripline:~$';
+
+    // Create input span
+    const inputSpan = document.createElement('span');
+    inputSpan.className = 'terminal-input';
+
+    // Create cursor
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor active';
+    cursor.textContent = '█';
+
+    // Assemble the line
+    newLine.appendChild(prompt);
+    newLine.appendChild(document.createTextNode(' '));
+    newLine.appendChild(inputSpan);
+    newLine.appendChild(document.createTextNode(' '));
+    newLine.appendChild(cursor);
+
+    // Add click handler
+    newLine.addEventListener('click', activateTerminal);
+
+    // Append to terminal content
+    terminalContent.appendChild(newLine);
+
+    // Update current references
+    currentTerminalLine = newLine;
+    currentInputSpan = inputSpan;
+    currentCursor = cursor;
+    inputText = '';
+}
+
+function activateTerminal() {
+    if (!isActive) {
+        isActive = true;
+        if (currentCursor) {
+            currentCursor.classList.add('active');
+        }
+    }
+}
+
 function initTerminalInput() {
     const terminalLine = document.querySelector('div.terminal-line:last-of-type');
     const cursor = terminalLine.querySelector('.cursor');
-    let inputText = '';
-    let isActive = false;
 
     // Create a span to hold the typed text
     const inputSpan = document.createElement('span');
@@ -215,13 +270,13 @@ function initTerminalInput() {
     terminalLine.insertBefore(inputSpan, cursor);
     terminalLine.insertBefore(document.createTextNode(' '), cursor);
 
+    // Set current references
+    currentTerminalLine = terminalLine;
+    currentInputSpan = inputSpan;
+    currentCursor = cursor;
+
     // Activate terminal on click
-    terminalLine.addEventListener('click', () => {
-        if (!isActive) {
-            isActive = true;
-            cursor.classList.add('active');
-        }
-    });
+    terminalLine.addEventListener('click', activateTerminal);
 
     // Handle keyboard input
     document.addEventListener('keydown', (e) => {
@@ -235,16 +290,24 @@ function initTerminalInput() {
 
         if (e.key === 'Backspace') {
             inputText = inputText.slice(0, -1);
-            inputSpan.textContent = inputText;
+            currentInputSpan.textContent = inputText;
         } else if (e.key === 'Enter') {
-            // Handle enter key - could add command processing here
+            // Log the command
             console.log('Command entered:', inputText);
-            inputText = '';
-            inputSpan.textContent = inputText;
+
+            // Remove cursor from current line
+            currentCursor.classList.remove('active');
+            currentCursor.style.display = 'none';
+
+            // Create new terminal line
+            createNewTerminalLine();
+
+            // Scroll to bottom
+            window.scrollTo(0, document.body.scrollHeight);
         } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
             // Regular character
             inputText += e.key;
-            inputSpan.textContent = inputText;
+            currentInputSpan.textContent = inputText;
         }
     });
 }
