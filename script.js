@@ -161,11 +161,33 @@ function bbsModemLoad() {
             return;
         }
 
-        // Just reveal the element (preserves HTML like links)
+        // For elements with HTML (like links), just reveal them
+        if (el.querySelector('a')) {
+            el.style.visibility = 'visible';
+            setTimeout(processNextElement, 50);
+            return;
+        }
+
+        // Character-by-character rendering for text elements
+        const originalText = el.textContent;
+        el.textContent = '';
         el.style.visibility = 'visible';
 
-        // Delay before processing next element for staggered appearance
-        setTimeout(processNextElement, el.tagName === 'PRE' ? 100 : 50);
+        let charIndex = 0;
+        const charDelay = el.tagName === 'PRE' ? 1 : 8; // Faster for ASCII art, slower for text
+
+        function typeNextChar() {
+            if (charIndex < originalText.length) {
+                el.textContent += originalText[charIndex];
+                charIndex++;
+                setTimeout(typeNextChar, charDelay);
+            } else {
+                // Move to next element after a brief pause
+                setTimeout(processNextElement, 20);
+            }
+        }
+
+        typeNextChar();
     }
 
     processNextElement();
