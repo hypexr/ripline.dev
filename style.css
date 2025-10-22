@@ -81,6 +81,8 @@ body {
     padding: 30px;
     box-shadow: 0 0 30px var(--shadow-color);
     flex: 1;
+    cursor: text;
+    min-height: 400px;
 }
 
 /* Hide content initially for BBS loading effect */

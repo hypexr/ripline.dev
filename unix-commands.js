@@ -3,7 +3,8 @@
 
 class UnixEmulator {
     constructor() {
-        this.fileSystem = {
+        // Default filesystem structure
+        const defaultFileSystem = {
             '/': {
                 'home': {
                     'user': {
@@ -16,15 +17,59 @@ class UnixEmulator {
                 }
             }
         };
-        this.currentPath = '/home/user';
+
+        // Try to load from localStorage
+        const savedFS = this.loadFromStorage('ripline_filesystem');
+        const savedPath = this.loadFromStorage('ripline_current_path');
+
+        this.fileSystem = savedFS || defaultFileSystem;
+        this.currentPath = savedPath || '/home/user';
+
         this.environment = {
             'USER': 'user',
             'HOME': '/home/user',
-            'PWD': '/home/user',
+            'PWD': this.currentPath,
             'PATH': '/usr/local/bin:/usr/bin:/bin',
             'SHELL': '/bin/bash'
         };
         this.commandHistory = [];
+
+        // Save initial state if nothing was loaded
+        if (!savedFS) {
+            this.saveToStorage('ripline_filesystem', this.fileSystem);
+        }
+        if (!savedPath) {
+            this.saveToStorage('ripline_current_path', this.currentPath);
+        }
+    }
+
+    // LocalStorage helpers
+    saveToStorage(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+            console.error('Failed to save to localStorage:', e);
+        }
+    }
+
+    loadFromStorage(key) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        } catch (e) {
+            console.error('Failed to load from localStorage:', e);
+            return null;
+        }
+    }
+
+    // Persist filesystem changes
+    persistFileSystem() {
+        this.saveToStorage('ripline_filesystem', this.fileSystem);
+    }
+
+    // Persist current path
+    persistCurrentPath() {
+        this.saveToStorage('ripline_current_path', this.currentPath);
     }
 
     // Helper: Navigate filesystem
@@ -111,6 +156,7 @@ Type any command to try it out!`;
             if (!args[0]) {
                 this.currentPath = this.environment.HOME;
                 this.environment.PWD = this.currentPath;
+                this.persistCurrentPath();
                 return '';
             }
 
@@ -127,6 +173,7 @@ Type any command to try it out!`;
 
             this.currentPath = newPath;
             this.environment.PWD = this.currentPath;
+            this.persistCurrentPath();
             return '';
         },
 
@@ -153,7 +200,10 @@ Type any command to try it out!`;
         },
 
         echo: (args) => {
-            return args.join(' ');
+            // Join arguments and remove surrounding quotes
+            const text = args.join(' ');
+            // Remove surrounding single or double quotes
+            return text.replace(/^["']|["']$/g, '');
         },
 
         clear: () => {
@@ -211,6 +261,7 @@ Type any command to try it out!`;
             }
 
             parent[dirName] = {};
+            this.persistFileSystem();
             return '';
         },
 
@@ -236,6 +287,7 @@ Type any command to try it out!`;
             if (!(fileName in parent)) {
                 parent[fileName] = '';
             }
+            this.persistFileSystem();
             return '';
         },
 
@@ -259,6 +311,7 @@ Type any command to try it out!`;
             }
 
             delete parent[fileName];
+            this.persistFileSystem();
             return '';
         },
 
@@ -296,25 +349,130 @@ Type any command to try it out!`;
         // Add to history
         this.commandHistory.push(commandLine);
 
+        // Check for output redirection (> or >>)
+        let redirectMode = null;
+        let redirectFile = null;
+        let actualCommand = commandLine;
+
+        // Parse redirection operators
+        const appendMatch = commandLine.match(/^(.+?)\s*>>\s*(.+)$/);
+        const overwriteMatch = commandLine.match(/^(.+?)\s*>\s*(.+)$/);
+
+        if (appendMatch) {
+            redirectMode = 'append';
+            actualCommand = appendMatch[1].trim();
+            redirectFile = appendMatch[2].trim();
+        } else if (overwriteMatch) {
+            redirectMode = 'overwrite';
+            actualCommand = overwriteMatch[1].trim();
+            redirectFile = overwriteMatch[2].trim();
+        }
+
         // Parse command and arguments
-        const parts = commandLine.trim().split(/\s+/);
+        const parts = actualCommand.trim().split(/\s+/);
         const command = parts[0];
         const args = parts.slice(1);
 
-        // Check if command exists
+        // Execute the command
+        let output = '';
         if (command in this.commands) {
             try {
-                return this.commands[command].call(this, args);
+                output = this.commands[command].call(this, args);
             } catch (error) {
                 return `Error executing ${command}: ${error.message}`;
             }
         } else {
             return `${command}: command not found`;
         }
+
+        // Handle redirection
+        if (redirectMode && redirectFile) {
+            const writeResult = this.writeToFile(redirectFile, output, redirectMode);
+            if (writeResult) {
+                return writeResult; // Error message
+            }
+            return ''; // Success - no output
+        }
+
+        return output;
+    }
+
+    writeToFile(filePath, content, mode) {
+        // Resolve the file path
+        const fullPath = this.resolvePath(filePath);
+        const parts = fullPath.split('/').filter(p => p);
+        const fileName = parts.pop();
+        const parentPath = '/' + parts.join('/');
+        const parent = this.getNode(parentPath);
+
+        if (!parent) {
+            return `bash: ${filePath}: No such file or directory`;
+        }
+
+        if (typeof parent !== 'object') {
+            return `bash: ${filePath}: Not a directory`;
+        }
+
+        // Check if target exists and is a directory
+        if (fileName in parent && typeof parent[fileName] === 'object') {
+            return `bash: ${filePath}: Is a directory`;
+        }
+
+        // Write to file
+        if (mode === 'append' && fileName in parent) {
+            parent[fileName] += content;
+        } else {
+            parent[fileName] = content;
+        }
+
+        this.persistFileSystem();
+        return null; // Success
     }
 
     getCurrentPath() {
         return this.currentPath;
+    }
+
+    // Tab completion helper
+    getCompletions(partial) {
+        const parts = partial.trim().split(/\s+/);
+
+        // If no space, complete command names
+        if (parts.length === 1) {
+            const prefix = parts[0];
+            const commands = Object.keys(this.commands).filter(cmd => cmd.startsWith(prefix));
+            return { type: 'command', matches: commands, prefix };
+        }
+
+        // If space exists, complete file/directory paths
+        const command = parts[0];
+        const pathPrefix = parts[parts.length - 1];
+
+        // Get directory to search
+        let searchDir = this.currentPath;
+        let filePrefix = pathPrefix;
+
+        if (pathPrefix.includes('/')) {
+            const lastSlash = pathPrefix.lastIndexOf('/');
+            const dirPart = pathPrefix.substring(0, lastSlash + 1);
+            filePrefix = pathPrefix.substring(lastSlash + 1);
+            searchDir = this.resolvePath(dirPart);
+        }
+
+        const node = this.getNode(searchDir);
+        if (!node || typeof node !== 'object') {
+            return { type: 'path', matches: [], prefix: pathPrefix };
+        }
+
+        // Find matching files/directories
+        const matches = Object.keys(node)
+            .filter(name => name.startsWith(filePrefix))
+            .map(name => {
+                const isDir = typeof node[name] === 'object';
+                return isDir ? name + '/' : name;
+            });
+
+        return { type: 'path', matches, prefix: pathPrefix, filePrefix };
     }
 }
 

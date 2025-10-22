@@ -239,9 +239,6 @@ function createNewTerminalLine() {
     newLine.appendChild(inputSpan);
     newLine.appendChild(cursor);
 
-    // Add click handler
-    newLine.addEventListener('click', activateTerminal);
-
     // Append to terminal content
     terminalContent.appendChild(newLine);
 
@@ -290,6 +287,13 @@ function activateTerminal() {
 function initTerminalInput() {
     const terminalLine = document.querySelector('div.terminal-line:last-of-type');
     const cursor = terminalLine.querySelector('.cursor');
+    const prompt = terminalLine.querySelector('.prompt');
+
+    // Update prompt with current directory
+    if (prompt && unixEmulator) {
+        const currentDir = unixEmulator.getCurrentPath();
+        prompt.textContent = `root@ripline:${currentDir}$`;
+    }
 
     // Create a span to hold the typed text
     const inputSpan = document.createElement('span');
@@ -301,8 +305,23 @@ function initTerminalInput() {
     currentInputSpan = inputSpan;
     currentCursor = cursor;
 
-    // Activate terminal on click
-    terminalLine.addEventListener('click', activateTerminal);
+    // Make entire terminal content clickable to activate
+    const terminalContent = document.querySelector('.terminal-content');
+    if (terminalContent) {
+        terminalContent.addEventListener('click', (e) => {
+            activateTerminal();
+            e.stopPropagation();
+        });
+    }
+
+    // Also make body clickable for terminal activation
+    document.body.addEventListener('click', (e) => {
+        // Check if click is inside terminal area
+        const terminalContent = document.querySelector('.terminal-content');
+        if (terminalContent && terminalContent.contains(e.target)) {
+            activateTerminal();
+        }
+    });
 
     // Handle keyboard input
     document.addEventListener('keydown', (e) => {
