@@ -284,6 +284,15 @@ function activateTerminal() {
     }
 }
 
+function deactivateTerminal() {
+    if (isActive) {
+        isActive = false;
+        if (currentCursor) {
+            currentCursor.classList.remove('active');
+        }
+    }
+}
+
 function initTerminalInput() {
     const terminalLine = document.querySelector('div.terminal-line:last-of-type');
     const cursor = terminalLine.querySelector('.cursor');
@@ -314,11 +323,14 @@ function initTerminalInput() {
         });
     }
 
-    // Also make body clickable for terminal activation
-    document.body.addEventListener('click', (e) => {
-        // Check if click is inside terminal area
+    // Handle clicks outside terminal to deactivate
+    document.addEventListener('click', (e) => {
         const terminalContent = document.querySelector('.terminal-content');
-        if (terminalContent && terminalContent.contains(e.target)) {
+        // If click is outside terminal content, deactivate
+        if (terminalContent && !terminalContent.contains(e.target)) {
+            deactivateTerminal();
+        } else if (terminalContent && terminalContent.contains(e.target)) {
+            // Click inside terminal, activate it
             activateTerminal();
         }
     });
@@ -329,13 +341,47 @@ function initTerminalInput() {
         if (!isActive) return;
 
         // Prevent default for terminal-related keys
-        if (e.key === 'Backspace' || e.key === 'Enter' || e.key.length === 1) {
+        if (e.key === 'Backspace' || e.key === 'Enter' || e.key === 'Tab' || e.key.length === 1) {
             e.preventDefault();
         }
 
         if (e.key === 'Backspace') {
             inputText = inputText.slice(0, -1);
             currentInputSpan.textContent = inputText;
+        } else if (e.key === 'Tab') {
+            // Tab completion
+            if (!inputText.trim()) return;
+
+            const completions = unixEmulator.getCompletions(inputText);
+
+            if (completions.matches.length === 1) {
+                // Single match - auto complete
+                const match = completions.matches[0];
+
+                if (completions.type === 'command') {
+                    inputText = match;
+                } else if (completions.type === 'path') {
+                    // Replace the path part
+                    const parts = inputText.split(/\s+/);
+                    const pathPrefix = completions.prefix;
+
+                    if (pathPrefix.includes('/')) {
+                        const lastSlash = pathPrefix.lastIndexOf('/');
+                        const dirPart = pathPrefix.substring(0, lastSlash + 1);
+                        parts[parts.length - 1] = dirPart + match;
+                    } else {
+                        parts[parts.length - 1] = match;
+                    }
+
+                    inputText = parts.join(' ');
+                }
+
+                currentInputSpan.textContent = inputText;
+            } else if (completions.matches.length > 1) {
+                // Multiple matches - show them
+                const matchList = completions.matches.join('  ');
+                displayCommandOutput(matchList);
+            }
         } else if (e.key === 'Enter') {
             // Execute the command
             const output = unixEmulator.execute(inputText);
