@@ -208,6 +208,7 @@ let currentInputSpan = null;
 let currentCursor = null;
 let inputText = '';
 let isActive = false;
+let unixEmulator = null;
 
 function createNewTerminalLine() {
     const terminalContent = document.querySelector('.terminal-content');
@@ -217,10 +218,11 @@ function createNewTerminalLine() {
     newLine.className = 'terminal-line';
     newLine.style.visibility = 'visible';
 
-    // Create prompt
+    // Create prompt with current directory
     const prompt = document.createElement('span');
     prompt.className = 'prompt';
-    prompt.textContent = 'root@ripline:~$';
+    const currentDir = unixEmulator ? unixEmulator.getCurrentPath() : '~';
+    prompt.textContent = `root@ripline:${currentDir}$`;
 
     // Create input span
     const inputSpan = document.createElement('span');
@@ -235,7 +237,6 @@ function createNewTerminalLine() {
     newLine.appendChild(prompt);
     newLine.appendChild(document.createTextNode(' '));
     newLine.appendChild(inputSpan);
-    newLine.appendChild(document.createTextNode(' '));
     newLine.appendChild(cursor);
 
     // Add click handler
@@ -249,6 +250,32 @@ function createNewTerminalLine() {
     currentInputSpan = inputSpan;
     currentCursor = cursor;
     inputText = '';
+}
+
+function displayCommandOutput(output) {
+    if (!output) return;
+
+    // Handle special commands
+    if (output === '__CLEAR__') {
+        // Clear all terminal lines except the header/footer
+        const terminalContent = document.querySelector('.terminal-content');
+        const allLines = terminalContent.querySelectorAll('.terminal-line, .terminal-output');
+        allLines.forEach(line => line.remove());
+        return;
+    }
+
+    const terminalContent = document.querySelector('.terminal-content');
+
+    // Create output element
+    const outputDiv = document.createElement('div');
+    outputDiv.className = 'terminal-output';
+    outputDiv.style.visibility = 'visible';
+    outputDiv.style.whiteSpace = 'pre-wrap';
+    outputDiv.style.margin = '5px 0';
+    outputDiv.textContent = output;
+
+    // Append after the current terminal line
+    terminalContent.appendChild(outputDiv);
 }
 
 function activateTerminal() {
@@ -268,7 +295,6 @@ function initTerminalInput() {
     const inputSpan = document.createElement('span');
     inputSpan.className = 'terminal-input';
     terminalLine.insertBefore(inputSpan, cursor);
-    terminalLine.insertBefore(document.createTextNode(' '), cursor);
 
     // Set current references
     currentTerminalLine = terminalLine;
@@ -292,12 +318,15 @@ function initTerminalInput() {
             inputText = inputText.slice(0, -1);
             currentInputSpan.textContent = inputText;
         } else if (e.key === 'Enter') {
-            // Log the command
-            console.log('Command entered:', inputText);
+            // Execute the command
+            const output = unixEmulator.execute(inputText);
 
             // Remove cursor from current line
             currentCursor.classList.remove('active');
             currentCursor.style.display = 'none';
+
+            // Display command output
+            displayCommandOutput(output);
 
             // Create new terminal line
             createNewTerminalLine();
@@ -314,6 +343,9 @@ function initTerminalInput() {
 
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Unix emulator
+    unixEmulator = new UnixEmulator();
+
     // Start matrix background
     new MatrixBackground();
 
@@ -348,12 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.style.paddingLeft = '20px';
         });
     });
-
-    // Console message for visitors
-    console.log('%c╔═══════════════════════════════════════╗', 'color: #00ff00; font-family: monospace');
-    console.log('%c║   WELCOME TO RIPLINE.DEV TERMINAL    ║', 'color: #00ff00; font-family: monospace');
-    console.log('%c║   Curious developer? We like that.   ║', 'color: #00ff00; font-family: monospace');
-    console.log('%c╚═══════════════════════════════════════╝', 'color: #00ff00; font-family: monospace');
 });
 
 // Add smooth scroll behavior
