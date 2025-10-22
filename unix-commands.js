@@ -682,13 +682,10 @@ Type any command to try it out!`;
 
                     // Remove each match
                     for (const match of matches) {
-                        const matchPath = resolvedDir === '/' ? `/${match}` : `${resolvedDir}/${match}`;
-
-                        // Check write permission
-                        if (!this.canWrite(matchPath)) {
-                            if (!force) {
-                                errors.push(`rm: cannot remove '${match}': Permission denied`);
-                            }
+                        // Check write permission on parent directory (resolvedDir)
+                        // Always show permission denied, even with -f flag
+                        if (!this.canWrite(resolvedDir)) {
+                            errors.push(`rm: cannot remove '${match}': Permission denied`);
                             continue;
                         }
 
@@ -715,12 +712,12 @@ Type any command to try it out!`;
                     const parentPath = '/' + parts.join('/');
                     const parent = this.getNode(parentPath);
 
-                    // Check write permission first (even for non-existent files)
+                    // Check write permission on parent directory first (even for non-existent files)
                     // This ensures permission denied takes precedence
-                    if (!this.canWrite(path)) {
-                        if (!force) {
-                            errors.push(`rm: cannot remove '${target}': Permission denied`);
-                        }
+                    // You need write permission on the parent directory to delete a file
+                    // Always show permission denied, even with -f flag
+                    if (!this.canWrite(parentPath)) {
+                        errors.push(`rm: cannot remove '${target}': Permission denied`);
                         continue;
                     }
 

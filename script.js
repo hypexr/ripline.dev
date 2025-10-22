@@ -174,7 +174,7 @@ function bbsModemLoad() {
         el.style.visibility = 'visible';
 
         let charIndex = 0;
-        const charDelay = el.tagName === 'PRE' ? 1 : 8; // Faster for ASCII art, slower for text
+        const charDelay = el.tagName === 'PRE' ? 0 : 3; // Faster for ASCII art, slower for text
 
         function typeNextChar() {
             if (charIndex < originalText.length) {
