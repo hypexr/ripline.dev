@@ -1,0 +1,3 @@
+# Tell GitHub secret scanning to ignore test/example credentials in unix-commands.js
+# These are intentionally fake credentials for a retro terminal emulator joke
+unix-commands.js linguist-generated=true
