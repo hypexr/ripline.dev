@@ -200,6 +200,7 @@ let currentCursor = null;
 let inputText = '';
 let isActive = false;
 let unixEmulator = null;
+let mobileInput = null;
 
 function createNewTerminalLine() {
     const terminalContent = document.querySelector('.terminal-content');
@@ -249,6 +250,11 @@ function createNewTerminalLine() {
     currentInputSpan = inputSpan;
     currentCursor = cursor;
     inputText = '';
+
+    // Clear mobile input
+    if (mobileInput) {
+        mobileInput.value = '';
+    }
 }
 
 function displayCommandOutput(output) {
@@ -293,6 +299,10 @@ function activateTerminal() {
         if (currentCursor) {
             currentCursor.classList.add('active');
         }
+        // Focus hidden input for mobile keyboard
+        if (mobileInput) {
+            mobileInput.focus();
+        }
     }
 }
 
@@ -301,6 +311,10 @@ function deactivateTerminal() {
         isActive = false;
         if (currentCursor) {
             currentCursor.classList.remove('active');
+        }
+        // Blur hidden input
+        if (mobileInput) {
+            mobileInput.blur();
         }
     }
 }
@@ -321,7 +335,12 @@ window.enableTerminal = function() {
     }
     // Reactivate the existing terminal
     activateTerminal();
-    window.scrollTo(0, document.body.scrollHeight);
+    // Scroll to bottom after layout is updated - use requestAnimationFrame for better timing
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    });
 };
 
 function setupClickHandlers() {
@@ -545,6 +564,54 @@ function initTerminalInput() {
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Unix emulator
     unixEmulator = new UnixEmulator();
+
+    // Initialize mobile input
+    mobileInput = document.getElementById('mobile-input');
+
+    // Set up mobile input event listeners
+    if (mobileInput) {
+        mobileInput.addEventListener('input', (e) => {
+            if (!isActive) return;
+
+            // Sync mobile input with terminal
+            inputText = e.target.value;
+            if (currentInputSpan) {
+                currentInputSpan.textContent = inputText;
+            }
+        });
+
+        mobileInput.addEventListener('keydown', (e) => {
+            if (!isActive) return;
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Clear mobile input
+                mobileInput.value = '';
+
+                // Execute the command
+                if (!unixEmulator) return;
+
+                const output = unixEmulator.execute(inputText);
+
+                // Remove cursor from current line
+                if (currentCursor) {
+                    currentCursor.classList.remove('active');
+                    currentCursor.style.display = 'none';
+                }
+
+                // Display command output
+                displayCommandOutput(output);
+
+                // Create new terminal line
+                createNewTerminalLine();
+
+                // Scroll to bottom
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+    }
 
     // Start matrix background
     new MatrixBackground();

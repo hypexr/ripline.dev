@@ -12,6 +12,7 @@ class ViEditor {
         this.cursorCol = 0;
         this.mode = 'normal'; // 'normal', 'insert', 'command'
         this.commandBuffer = '';
+        this.normalModeBuffer = ''; // For multi-key commands like dd
         this.yankBuffer = '';
         this.message = '';
         this.modified = false;
@@ -128,8 +129,145 @@ class ViEditor {
         this.render();
     }
 
+    handleDeleteMotion(key) {
+        let deletedContent = '';
+        let numLinesDeleted = 0;
+
+        if (key === 'd') {
+            // dd - delete entire line
+            deletedContent = this.lines[this.cursorRow];
+            this.lines.splice(this.cursorRow, 1);
+            numLinesDeleted = 1;
+
+            // Ensure there's always at least one line
+            if (this.lines.length === 0) {
+                this.lines = [''];
+            }
+
+            // Adjust cursor position
+            if (this.cursorRow >= this.lines.length) {
+                this.cursorRow = this.lines.length - 1;
+            }
+            this.cursorCol = 0;
+        } else if (key === 'j' || key === 'ArrowDown') {
+            // dj - delete current line and next line
+            if (this.cursorRow < this.lines.length - 1) {
+                deletedContent = this.lines[this.cursorRow] + '\n' + this.lines[this.cursorRow + 1];
+                this.lines.splice(this.cursorRow, 2);
+                numLinesDeleted = 2;
+
+                if (this.lines.length === 0) {
+                    this.lines = [''];
+                }
+                if (this.cursorRow >= this.lines.length) {
+                    this.cursorRow = this.lines.length - 1;
+                }
+            } else {
+                // Just delete current line if at bottom
+                deletedContent = this.lines[this.cursorRow];
+                this.lines.splice(this.cursorRow, 1);
+                numLinesDeleted = 1;
+
+                if (this.lines.length === 0) {
+                    this.lines = [''];
+                }
+                if (this.cursorRow >= this.lines.length) {
+                    this.cursorRow = this.lines.length - 1;
+                }
+            }
+            this.cursorCol = 0;
+        } else if (key === 'k' || key === 'ArrowUp') {
+            // dk - delete current line and previous line
+            if (this.cursorRow > 0) {
+                deletedContent = this.lines[this.cursorRow - 1] + '\n' + this.lines[this.cursorRow];
+                this.lines.splice(this.cursorRow - 1, 2);
+                numLinesDeleted = 2;
+                this.cursorRow--;
+
+                if (this.lines.length === 0) {
+                    this.lines = [''];
+                    this.cursorRow = 0;
+                }
+                if (this.cursorRow >= this.lines.length) {
+                    this.cursorRow = this.lines.length - 1;
+                }
+            } else {
+                // Just delete current line if at top
+                deletedContent = this.lines[this.cursorRow];
+                this.lines.splice(this.cursorRow, 1);
+                numLinesDeleted = 1;
+
+                if (this.lines.length === 0) {
+                    this.lines = [''];
+                }
+            }
+            this.cursorCol = 0;
+        } else if (key === '$') {
+            // d$ - delete to end of line
+            deletedContent = this.lines[this.cursorRow].slice(this.cursorCol);
+            this.lines[this.cursorRow] = this.lines[this.cursorRow].slice(0, this.cursorCol);
+        } else if (key === '0') {
+            // d0 - delete to beginning of line
+            deletedContent = this.lines[this.cursorRow].slice(0, this.cursorCol);
+            this.lines[this.cursorRow] = this.lines[this.cursorRow].slice(this.cursorCol);
+            this.cursorCol = 0;
+        } else if (key === 'w') {
+            // dw - delete word (simplified: delete to next space or end of line)
+            const line = this.lines[this.cursorRow];
+            const remaining = line.slice(this.cursorCol);
+            const match = remaining.match(/^\S+\s*/);
+
+            if (match) {
+                deletedContent = match[0];
+                this.lines[this.cursorRow] = line.slice(0, this.cursorCol) + line.slice(this.cursorCol + match[0].length);
+            }
+        } else if (key === 'l' || key === 'ArrowRight') {
+            // dl - delete character at cursor (same as x)
+            const line = this.lines[this.cursorRow];
+            if (this.cursorCol < line.length) {
+                deletedContent = line[this.cursorCol];
+                this.lines[this.cursorRow] = line.slice(0, this.cursorCol) + line.slice(this.cursorCol + 1);
+            }
+        } else if (key === 'h' || key === 'ArrowLeft') {
+            // dh - delete character before cursor
+            const line = this.lines[this.cursorRow];
+            if (this.cursorCol > 0) {
+                deletedContent = line[this.cursorCol - 1];
+                this.lines[this.cursorRow] = line.slice(0, this.cursorCol - 1) + line.slice(this.cursorCol);
+                this.cursorCol--;
+            }
+        } else {
+            // Unknown motion, cancel delete
+            this.normalModeBuffer = '';
+            return;
+        }
+
+        // Store deleted content in yank buffer and mark as modified
+        if (deletedContent) {
+            this.yankBuffer = deletedContent;
+            this.modified = true;
+
+            if (numLinesDeleted > 0) {
+                this.message = `${numLinesDeleted} line${numLinesDeleted > 1 ? 's' : ''} deleted`;
+            } else {
+                this.message = 'deleted';
+            }
+        }
+
+        this.normalModeBuffer = '';
+    }
+
     handleNormalMode(e) {
         const key = e.key;
+
+        // Check for delete motion commands (d + motion)
+        if (this.normalModeBuffer === 'd') {
+            this.handleDeleteMotion(key);
+            return;
+        }
+
+        // Clear the buffer if a different key is pressed
+        this.normalModeBuffer = '';
 
         // Movement
         if (key === 'h' || key === 'ArrowLeft') {
@@ -182,6 +320,8 @@ class ViEditor {
         } else if (key === 'd' && e.shiftKey) { // D - delete to end of line
             this.lines[this.cursorRow] = this.lines[this.cursorRow].slice(0, this.cursorCol);
             this.modified = true;
+        } else if (key === 'd' && !e.shiftKey) { // d - start of multi-key command (dd, dw, etc)
+            this.normalModeBuffer = 'd';
         }
 
         // Yank (copy) line
