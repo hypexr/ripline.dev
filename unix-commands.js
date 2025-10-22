@@ -65,7 +65,7 @@ class UnixEmulator {
                             'Downloads': {
                                 'cat_wearing_sunglasses.jpg': '[image - 1.2MB - a very cool cat]',
                                 'jokes.txt': 'Programming Jokes\n==================\n\nQ: Why do programmers prefer dark mode?\nA: Because light attracts bugs!\n\nQ: How many programmers does it take to change a light bulb?\nA: None, that\'s a hardware problem.\n\nQ: What\'s a programmer\'s favorite hangout place?\nA: Foo Bar\n\nQ: Why did the programmer quit his job?\nA: Because he didn\'t get arrays.\n\n"There are only 10 types of people in the world:\nthose who understand binary, and those who don\'t."\n\n"It works on my machine!" - Every developer ever\n',
-                                'todo.txt': 'TODO List\n=========\n\n[ ] Learn to play guitar\n[ ] Actually read that book I bought 3 years ago\n[X] Procrastinate\n[ ] Stop procrastinating\n[ ] Build that side project (maybe tomorrow)\n[ ] Fix production bug (it\'s not THAT critical)\n[ ] Reply to emails from last month\n[ ] Organize downloads folder (lol)\n',
+                                'todo.txt': 'TODO List\n=========\n\n[ ] Learn to play guitar\n[ ] Actually read that book I bought 3 years ago\n[X] Procrastinate\n[ ] Stop procrastinating\n[ ] Build that side project (maybe tomorrow)\n[ ] Fix production bug (it\'s not THAT critical)\n[ ] Reply to emails from last month\n[ ] Organize downloads folder\n',
                                 'important_notes.txt': 'IMPORTANT NOTES\n===============\n\nReminder: Coffee is NOT a breakfast.\n\nPassword for WiFi: TryGuessing123\n\nGreat ideas at 3am:\n- App that tells you when coffee is ready\n- Social network for pets\n- Blockchain but for sandwiches\n\nNote to self: Stop having great ideas at 3am\n',
                                 'definitely_not_memes.zip': '[compressed archive - 420MB - definitely work files]'
                             }
@@ -685,7 +685,7 @@ Type any command to try it out!`;
                         // Check write permission on parent directory (resolvedDir)
                         // Always show permission denied, even with -f flag
                         if (!this.canWrite(resolvedDir)) {
-                            errors.push(`rm: cannot remove '${match}': Permission denied`);
+                            errors.push(`rm: cannot remove '${match}': Permission denied\nThis incident has been reported.`);
                             continue;
                         }
 
@@ -717,7 +717,7 @@ Type any command to try it out!`;
                     // You need write permission on the parent directory to delete a file
                     // Always show permission denied, even with -f flag
                     if (!this.canWrite(parentPath)) {
-                        errors.push(`rm: cannot remove '${target}': Permission denied`);
+                        errors.push(`rm: cannot remove '${target}': Permission denied\nThis incident has been reported.`);
                         continue;
                     }
 
