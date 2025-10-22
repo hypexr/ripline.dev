@@ -202,6 +202,44 @@ function bbsModemLoad() {
     processNextElement();
 }
 
+// Terminal input handler
+function initTerminalInput() {
+    const terminalLine = document.querySelector('div.terminal-line:last-of-type');
+    const cursor = terminalLine.querySelector('.cursor');
+    let inputText = '';
+
+    // Create a span to hold the typed text
+    const inputSpan = document.createElement('span');
+    inputSpan.className = 'terminal-input';
+    terminalLine.insertBefore(inputSpan, cursor);
+    terminalLine.insertBefore(document.createTextNode(' '), cursor);
+
+    // Handle keyboard input
+    document.addEventListener('keydown', (e) => {
+        // Prevent default for terminal-related keys
+        if (e.key === 'Backspace' || e.key === 'Enter' || e.key.length === 1) {
+            e.preventDefault();
+        }
+
+        if (e.key === 'Backspace') {
+            inputText = inputText.slice(0, -1);
+            inputSpan.textContent = inputText;
+        } else if (e.key === 'Enter') {
+            // Handle enter key - could add command processing here
+            console.log('Command entered:', inputText);
+            inputText = '';
+            inputSpan.textContent = inputText;
+        } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+            // Regular character
+            inputText += e.key;
+            inputSpan.textContent = inputText;
+        }
+    });
+
+    // Focus the page to capture keyboard input
+    window.focus();
+}
+
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Start matrix background
@@ -213,6 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // BBS modem loading effect
     bbsModemLoad();
+
+    // Initialize terminal input after loading completes
+    setTimeout(() => {
+        initTerminalInput();
+    }, 3000); // Adjust timing based on loading duration
 
     // Typing effect (after a short delay)
     setTimeout(typeCommand, 500);
