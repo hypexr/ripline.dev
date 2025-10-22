@@ -63,9 +63,11 @@ class UnixEmulator {
                                 'cc_numbers.txt': '# DO NOT DISTRIBUTE\n4532-1234-5678-9012 CVV:123 EXP:12/26\n5412-9876-5432-1098 CVV:456 EXP:03/27\n# More cards harvested from phishing campaign\n'
                             },
                             'Downloads': {
-                                'exploit_db.sql': '[SQL dump - vulnerability database]',
-                                'darkweb_tools.zip': '[archive - hacking tools]',
-                                'leaked_databases.tar': '[compressed - 45GB data breach]'
+                                'cat_wearing_sunglasses.jpg': '[image - 1.2MB - a very cool cat]',
+                                'jokes.txt': 'Programming Jokes\n==================\n\nQ: Why do programmers prefer dark mode?\nA: Because light attracts bugs!\n\nQ: How many programmers does it take to change a light bulb?\nA: None, that\'s a hardware problem.\n\nQ: What\'s a programmer\'s favorite hangout place?\nA: Foo Bar\n\nQ: Why did the programmer quit his job?\nA: Because he didn\'t get arrays.\n\n"There are only 10 types of people in the world:\nthose who understand binary, and those who don\'t."\n\n"It works on my machine!" - Every developer ever\n',
+                                'todo.txt': 'TODO List\n=========\n\n[ ] Learn to play guitar\n[ ] Actually read that book I bought 3 years ago\n[X] Procrastinate\n[ ] Stop procrastinating\n[ ] Build that side project (maybe tomorrow)\n[ ] Fix production bug (it\'s not THAT critical)\n[ ] Reply to emails from last month\n[ ] Organize downloads folder (lol)\n',
+                                'important_notes.txt': 'IMPORTANT NOTES\n===============\n\nReminder: Coffee is NOT a breakfast.\n\nPassword for WiFi: TryGuessing123\n\nGreat ideas at 3am:\n- App that tells you when coffee is ready\n- Social network for pets\n- Blockchain but for sandwiches\n\nNote to self: Stop having great ideas at 3am\n',
+                                'definitely_not_memes.zip': '[compressed archive - 420MB - definitely work files]'
                             }
                         }
                     }
@@ -81,6 +83,22 @@ class UnixEmulator {
                     }
                 },
                 'var': {
+                    'spool': {
+                        'mail': {
+                            '.backup': {
+                                'exploit_db.sql': '[SQL dump - vulnerability database]',
+                                'archive_2024.tar': '[compressed - 45GB data breach]'
+                            }
+                        }
+                    },
+                    'cache': {
+                        'apt': {
+                            'archives': {
+                                'darkweb_tools.zip': '[archive - hacking tools]',
+                                '.pkg-temp': '[temporary file]'
+                            }
+                        }
+                    },
                     'log': {
                         'syslog': 'Oct 22 10:15:23 ripline systemd[1]: Started System Logging Service.\nOct 22 10:15:24 ripline systemd[1]: Starting Network Manager...\nOct 22 10:15:25 ripline NetworkManager[512]: NetworkManager (version 1.30.0) is starting...\nOct 22 10:16:33 ripline kernel: Module loaded from /opt/trojan/rootkit.ko\nOct 22 10:18:42 ripline cron[666]: (root) CMD (/tmp/.backdoor)\nOct 22 10:23:15 ripline systemd[1]: Started cryptominer.service\nOct 22 10:45:22 ripline kernel: Out of memory: Kill process 5555 (mimikatz) score 850 or sacrifice child\n',
                         'auth.log': 'Oct 22 09:14:23 ripline sshd[1024]: Failed password for root from 45.142.212.61 port 52341\nOct 22 09:14:25 ripline sshd[1024]: Failed password for root from 45.142.212.61 port 52341\nOct 22 09:14:28 ripline sshd[1024]: Failed password for admin from 45.142.212.61 port 52341\nOct 22 09:15:01 ripline sshd[1156]: Accepted password for root from 185.220.101.42 port 44182\nOct 22 10:15:30 ripline sshd[1024]: Server listening on 0.0.0.0 port 22.\nOct 22 10:16:45 ripline sshd[1156]: Accepted publickey for kmitnick from 192.168.1.100\nOct 22 10:18:23 ripline sudo: kmitnick : TTY=pts/0 ; PWD=/home/user/kmitnick ; USER=root ; COMMAND=/bin/bash\nOct 22 10:22:15 ripline su[2341]: (to root) kmitnick on pts/0\nOct 22 10:28:52 ripline sshd[1337]: Accepted password for admin from 45.142.212.61 port 52341\n',
