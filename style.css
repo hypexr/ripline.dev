@@ -83,14 +83,48 @@ body {
     flex: 1;
 }
 
+/* Hide content initially for BBS loading effect */
+.terminal-content pre,
+.terminal-content h2,
+.terminal-content h3,
+.terminal-content p,
+.terminal-content div.terminal-line {
+    visibility: hidden;
+}
+
+/* Keep cursor visible and blinking after load */
+.terminal-content div.terminal-line.loaded {
+    visibility: visible;
+}
+
+.terminal-content div.terminal-line.loaded .cursor {
+    visibility: visible;
+}
+
+/* BBS Loading effect */
+.bbs-loading {
+    opacity: 0;
+}
+
+.bbs-reveal {
+    animation: reveal 0.1s forwards;
+}
+
+@keyframes reveal {
+    to {
+        opacity: 1;
+    }
+}
+
 /* ASCII Logo */
 .ascii-logo {
     color: var(--primary-color);
     font-size: 0.7em;
-    text-align: center;
-    margin-bottom: 30px;
+    text-align: left;
+    margin: 0 auto 30px auto;
     text-shadow: 0 0 10px var(--shadow-color);
     animation: glow-pulse 2s ease-in-out infinite;
+    display: table;
 }
 
 @keyframes glow-pulse {

@@ -132,6 +132,73 @@ function screenGlitch() {
     }
 }
 
+// BBS-style modem loading effect - line by line, character by character
+function bbsModemLoad() {
+    const content = document.querySelector('.terminal-content');
+    const allElements = content.querySelectorAll('pre, h2, h3, p, div.terminal-line');
+
+    let elementIndex = 0;
+
+    function processNextElement() {
+        if (elementIndex >= allElements.length) {
+            // Mark terminal line as loaded so cursor blinks
+            const terminalLine = document.querySelector('div.terminal-line:last-of-type');
+            if (terminalLine) {
+                terminalLine.classList.add('loaded');
+            }
+            return;
+        }
+
+        const el = allElements[elementIndex];
+        elementIndex++;
+
+        // Skip if element is empty or only whitespace
+        if (!el.textContent.trim()) {
+            processNextElement();
+            return;
+        }
+
+        // Store original content and clear
+        const originalHTML = el.innerHTML;
+        const originalText = el.textContent;
+        el.textContent = '';
+        el.style.visibility = 'visible';
+
+        // For ASCII logo (pre tag), reveal line by line
+        if (el.tagName === 'PRE') {
+            const lines = originalHTML.split('\n');
+            let lineIndex = 0;
+
+            function revealNextLine() {
+                if (lineIndex < lines.length) {
+                    el.textContent += (lineIndex > 0 ? '\n' : '') + lines[lineIndex];
+                    lineIndex++;
+                    setTimeout(revealNextLine, 400);
+                } else {
+                    setTimeout(processNextElement, 50);
+                }
+            }
+            revealNextLine();
+        } else {
+            // Character by character for other elements
+            let charIndex = 0;
+
+            function revealNextChar() {
+                if (charIndex < originalText.length) {
+                    el.textContent += originalText[charIndex];
+                    charIndex++;
+                    setTimeout(revealNextChar, 8);
+                } else {
+                    setTimeout(processNextElement, 30);
+                }
+            }
+            revealNextChar();
+        }
+    }
+
+    processNextElement();
+}
+
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Start matrix background
@@ -140,6 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update clock
     updateClock();
     setInterval(updateClock, 1000);
+
+    // BBS modem loading effect
+    bbsModemLoad();
 
     // Typing effect (after a short delay)
     setTimeout(typeCommand, 500);
