@@ -161,42 +161,11 @@ function bbsModemLoad() {
             return;
         }
 
-        // Store original content and clear
-        const originalHTML = el.innerHTML;
-        const originalText = el.textContent;
-        el.textContent = '';
+        // Just reveal the element (preserves HTML like links)
         el.style.visibility = 'visible';
 
-        // For ASCII logo (pre tag), reveal line by line
-        if (el.tagName === 'PRE') {
-            const lines = originalHTML.split('\n');
-            let lineIndex = 0;
-
-            function revealNextLine() {
-                if (lineIndex < lines.length) {
-                    el.textContent += (lineIndex > 0 ? '\n' : '') + lines[lineIndex];
-                    lineIndex++;
-                    setTimeout(revealNextLine, 400);
-                } else {
-                    setTimeout(processNextElement, 50);
-                }
-            }
-            revealNextLine();
-        } else {
-            // Character by character for other elements
-            let charIndex = 0;
-
-            function revealNextChar() {
-                if (charIndex < originalText.length) {
-                    el.textContent += originalText[charIndex];
-                    charIndex++;
-                    setTimeout(revealNextChar, 8);
-                } else {
-                    setTimeout(processNextElement, 30);
-                }
-            }
-            revealNextChar();
-        }
+        // Delay before processing next element for staggered appearance
+        setTimeout(processNextElement, el.tagName === 'PRE' ? 100 : 50);
     }
 
     processNextElement();
@@ -218,11 +187,22 @@ function createNewTerminalLine() {
     newLine.className = 'terminal-line';
     newLine.style.visibility = 'visible';
 
-    // Create prompt with current directory
+    // Create prompt with current user and directory
     const prompt = document.createElement('span');
     prompt.className = 'prompt';
-    const currentDir = unixEmulator ? unixEmulator.getCurrentPath() : '~';
-    prompt.textContent = `root@ripline:${currentDir}$`;
+    const currentUser = unixEmulator ? unixEmulator.getCurrentUser() : 'kmitnick';
+    let currentDir = unixEmulator ? unixEmulator.getCurrentPath() : '~';
+    const homeDir = unixEmulator ? unixEmulator.environment.HOME : '/home/user/kmitnick';
+
+    // Replace home directory with ~
+    if (currentDir === homeDir) {
+        currentDir = '~';
+    } else if (currentDir.startsWith(homeDir + '/')) {
+        currentDir = '~' + currentDir.substring(homeDir.length);
+    }
+
+    const promptChar = currentUser === 'root' ? '#' : '$';
+    prompt.textContent = `${currentUser}@ripline:${currentDir}${promptChar}`;
 
     // Create input span
     const inputSpan = document.createElement('span');
@@ -261,6 +241,16 @@ function displayCommandOutput(output) {
         return;
     }
 
+    if (output === '__VI_OPENED__') {
+        // Vi editor opened, don't show output
+        return;
+    }
+
+    if (output && output.startsWith('__USER_SWITCHED__:')) {
+        // User switched, don't show output - new prompt will reflect the change
+        return;
+    }
+
     const terminalContent = document.querySelector('.terminal-content');
 
     // Create output element
@@ -293,26 +283,35 @@ function deactivateTerminal() {
     }
 }
 
-function initTerminalInput() {
-    const terminalLine = document.querySelector('div.terminal-line:last-of-type');
-    const cursor = terminalLine.querySelector('.cursor');
-    const prompt = terminalLine.querySelector('.prompt');
-
-    // Update prompt with current directory
-    if (prompt && unixEmulator) {
-        const currentDir = unixEmulator.getCurrentPath();
-        prompt.textContent = `root@ripline:${currentDir}$`;
+// Functions to disable/enable terminal for vi editor
+window.disableTerminal = function() {
+    deactivateTerminal();
+    const container = document.querySelector('.container');
+    if (container) {
+        container.style.display = 'none';
     }
+};
 
-    // Create a span to hold the typed text
-    const inputSpan = document.createElement('span');
-    inputSpan.className = 'terminal-input';
-    terminalLine.insertBefore(inputSpan, cursor);
+window.enableTerminal = function() {
+    const container = document.querySelector('.container');
+    if (container) {
+        container.style.display = 'flex';
+    }
+    // Reactivate the existing terminal
+    activateTerminal();
+    window.scrollTo(0, document.body.scrollHeight);
+};
 
-    // Set current references
-    currentTerminalLine = terminalLine;
-    currentInputSpan = inputSpan;
-    currentCursor = cursor;
+function setupClickHandlers() {
+    // Set up initial terminal references immediately
+    const terminalLine = document.querySelector('div.terminal-line:last-of-type');
+    if (terminalLine) {
+        const cursor = terminalLine.querySelector('.cursor');
+        if (cursor) {
+            currentTerminalLine = terminalLine;
+            currentCursor = cursor;
+        }
+    }
 
     // Make entire terminal content clickable to activate
     const terminalContent = document.querySelector('.terminal-content');
@@ -326,14 +325,65 @@ function initTerminalInput() {
     // Handle clicks outside terminal to deactivate
     document.addEventListener('click', (e) => {
         const terminalContent = document.querySelector('.terminal-content');
+
+        // Check if click is on a link or interactive element
+        if (e.target.tagName === 'A' || e.target.closest('a')) {
+            // Don't activate terminal if clicking on a link
+            return;
+        }
+
         // If click is outside terminal content, deactivate
         if (terminalContent && !terminalContent.contains(e.target)) {
             deactivateTerminal();
         } else if (terminalContent && terminalContent.contains(e.target)) {
-            // Click inside terminal, activate it
-            activateTerminal();
+            // Don't activate if clicking on text content elements
+            const clickedElement = e.target;
+            const isTextElement = ['P', 'H2', 'H3', 'SPAN', 'PRE'].includes(clickedElement.tagName);
+            const isProjectDiv = clickedElement.classList.contains('project');
+
+            // Activate terminal if clicking on:
+            // - terminal-content itself
+            // - content-section (whitespace areas)
+            // - terminal-line or its children
+            // But NOT on text elements (P, H2, H3, etc.) or project divs
+            if (!isTextElement && !isProjectDiv) {
+                activateTerminal();
+            }
         }
     });
+}
+
+function initTerminalInput() {
+    const terminalLine = document.querySelector('div.terminal-line:last-of-type');
+    const cursor = terminalLine.querySelector('.cursor');
+    const prompt = terminalLine.querySelector('.prompt');
+
+    // Update prompt with current user and directory
+    if (prompt && unixEmulator) {
+        const currentUser = unixEmulator.getCurrentUser();
+        let currentDir = unixEmulator.getCurrentPath();
+        const homeDir = unixEmulator.environment.HOME;
+
+        // Replace home directory with ~
+        if (currentDir === homeDir) {
+            currentDir = '~';
+        } else if (currentDir.startsWith(homeDir + '/')) {
+            currentDir = '~' + currentDir.substring(homeDir.length);
+        }
+
+        const promptChar = currentUser === 'root' ? '#' : '$';
+        prompt.textContent = `${currentUser}@ripline:${currentDir}${promptChar}`;
+    }
+
+    // Create a span to hold the typed text
+    const inputSpan = document.createElement('span');
+    inputSpan.className = 'terminal-input';
+    terminalLine.insertBefore(inputSpan, cursor);
+
+    // Set current references
+    currentTerminalLine = terminalLine;
+    currentInputSpan = inputSpan;
+    currentCursor = cursor;
 
     // Handle keyboard input
     document.addEventListener('keydown', (e) => {
@@ -417,6 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update clock
     updateClock();
     setInterval(updateClock, 1000);
+
+    // Set up click handlers immediately so terminal can be activated right away
+    setupClickHandlers();
 
     // BBS modem loading effect
     bbsModemLoad();
