@@ -1,20 +1,29 @@
 {
   "name": "ripline.dev",
   "version": "1.0.0",
-  "main": "script.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write \"*.{js,html,css,json}\"",
-    "format:check": "prettier --check \"*.{js,html,css,json}\""
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "unix-shell-js": "^1.1.1"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "unix-shell-js": "^1.2.0"
   },
   "devDependencies": {
-    "prettier": "^3.6.2"
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
   }
 }

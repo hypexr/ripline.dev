@@ -16,7 +16,7 @@
 }
 
 body {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Courier New', 'Consolas', 'Monaco', 'Lucida Console', monospace;
   background: var(--bg-color);
   color: var(--text-color);
   overflow-x: hidden;
@@ -85,17 +85,12 @@ body {
   min-height: 400px;
 }
 
-/* Hide content initially for BBS loading effect */
+/* Content is always visible in React version */
 .terminal-content pre,
 .terminal-content h2,
 .terminal-content h3,
 .terminal-content p,
 .terminal-content div.terminal-line {
-  visibility: hidden;
-}
-
-/* Keep cursor visible and blinking after load */
-.terminal-content div.terminal-line.loaded {
   visibility: visible;
 }
 
@@ -150,6 +145,22 @@ body {
 .prompt {
   color: var(--primary-color);
   font-weight: bold;
+}
+
+.terminal-input {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1em;
+  outline: none;
+  flex: 1;
+  caret-color: var(--primary-color);
+}
+
+.terminal-input::selection {
+  background: var(--primary-color);
+  color: var(--bg-color);
 }
 
 .command {
