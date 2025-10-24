@@ -174,7 +174,7 @@ function bbsModemLoad() {
         el.style.visibility = 'visible';
 
         let charIndex = 0;
-        const charDelay = el.tagName === 'PRE' ? 0 : 3; // Faster for ASCII art, slower for text
+        const charDelay = el.tagName === 'PRE' ? 1 : 3; // Modem speed for ASCII art, slightly slower for text
 
         function typeNextChar() {
             if (charIndex < originalText.length) {
@@ -572,8 +572,20 @@ function initTerminalInput() {
 
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Unix emulator
-    unixEmulator = new UnixEmulator();
+    // Initialize Unix emulator with custom filesystem, commands, and built-in persistence
+    unixEmulator = new UnixShell({
+        username: 'kmitnick',
+        fileSystem: createRiplineFileSystem(),
+        customCommands: customCommands,
+        persistence: {
+            enabled: true,
+            prefix: 'ripline'  // Uses 'ripline_filesystem', 'ripline_current_user', 'ripline_current_path'
+        }
+    });
+
+    // Always start in home directory on page load
+    unixEmulator.currentPath = unixEmulator.environment.HOME;
+    unixEmulator.environment.PWD = unixEmulator.environment.HOME;
 
     // Initialize mobile input
     mobileInput = document.getElementById('mobile-input');
