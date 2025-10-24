@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"*.{js,html,css,json}\"",
+    "format:check": "prettier --check \"*.{js,html,css,json}\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "unix-shell-js": "^1.0.1"
+    "unix-shell-js": "^1.1.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }

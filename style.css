@@ -1,88 +1,88 @@
 /* BBS Terminal Style - RIPLINE.DEV */
 
 :root {
-    --primary-color: #00ff00;
-    --secondary-color: #00aa00;
-    --bg-color: #000000;
-    --text-color: #00ff00;
-    --border-color: #00ff00;
-    --shadow-color: rgba(0, 255, 0, 0.5);
+  --primary-color: #00ff00;
+  --secondary-color: #00aa00;
+  --bg-color: #000000;
+  --text-color: #00ff00;
+  --border-color: #00ff00;
+  --shadow-color: rgba(0, 255, 0, 0.5);
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Courier New', Courier, monospace;
-    background: var(--bg-color);
-    color: var(--text-color);
-    overflow-x: hidden;
-    line-height: 1.6;
+  font-family: 'Courier New', Courier, monospace;
+  background: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+  line-height: 1.6;
 }
 
 /* Animated background canvas */
 #matrix-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    opacity: 0.15;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.15;
 }
 
 /* Main container */
 .container {
-    position: relative;
-    z-index: 1;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Terminal styling */
 .terminal-header,
 .terminal-footer {
-    background: var(--bg-color);
-    border: 2px solid var(--border-color);
-    padding: 10px 15px;
-    box-shadow: 0 0 20px var(--shadow-color);
+  background: var(--bg-color);
+  border: 2px solid var(--border-color);
+  padding: 10px 15px;
+  box-shadow: 0 0 20px var(--shadow-color);
 }
 
 .terminal-header {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .terminal-footer {
-    margin-top: auto;
+  margin-top: auto;
 }
 
 .status-bar {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9em;
-    letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  letter-spacing: 1px;
 }
 
 .float-right {
-    margin-left: auto;
+  margin-left: auto;
 }
 
 /* Main content area */
 .terminal-content {
-    background: var(--bg-color);
-    border: 2px solid var(--border-color);
-    padding: 30px;
-    box-shadow: 0 0 30px var(--shadow-color);
-    flex: 1;
-    cursor: text;
-    min-height: 400px;
+  background: var(--bg-color);
+  border: 2px solid var(--border-color);
+  padding: 30px;
+  box-shadow: 0 0 30px var(--shadow-color);
+  flex: 1;
+  cursor: text;
+  min-height: 400px;
 }
 
 /* Hide content initially for BBS loading effect */
@@ -91,222 +91,227 @@ body {
 .terminal-content h3,
 .terminal-content p,
 .terminal-content div.terminal-line {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 /* Keep cursor visible and blinking after load */
 .terminal-content div.terminal-line.loaded {
-    visibility: visible;
+  visibility: visible;
 }
 
 .terminal-content div.terminal-line.loaded .cursor {
-    visibility: visible;
+  visibility: visible;
 }
 
 /* BBS Loading effect */
 .bbs-loading {
-    opacity: 0;
+  opacity: 0;
 }
 
 .bbs-reveal {
-    animation: reveal 0.1s forwards;
+  animation: reveal 0.1s forwards;
 }
 
 @keyframes reveal {
-    to {
-        opacity: 1;
-    }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ASCII Logo */
 .ascii-logo {
-    color: var(--primary-color);
-    font-size: 0.7em;
-    text-align: left;
-    margin: 0 auto 30px auto;
-    text-shadow: 0 0 10px var(--shadow-color);
-    animation: glow-pulse 2s ease-in-out infinite;
-    display: table;
+  color: var(--primary-color);
+  font-size: 0.7em;
+  text-align: left;
+  margin: 0 auto 30px auto;
+  text-shadow: 0 0 10px var(--shadow-color);
+  animation: glow-pulse 2s ease-in-out infinite;
+  display: table;
 }
 
 @keyframes glow-pulse {
-    0%, 100% {
-        text-shadow: 0 0 10px var(--shadow-color);
-    }
-    50% {
-        text-shadow: 0 0 20px var(--shadow-color), 0 0 30px var(--shadow-color);
-    }
+  0%,
+  100% {
+    text-shadow: 0 0 10px var(--shadow-color);
+  }
+  50% {
+    text-shadow:
+      0 0 20px var(--shadow-color),
+      0 0 30px var(--shadow-color);
+  }
 }
 
 /* Terminal prompt line */
 .terminal-line {
-    margin: 20px 0;
-    font-size: 1em;
+  margin: 20px 0;
+  font-size: 1em;
 }
 
 .prompt {
-    color: var(--primary-color);
-    font-weight: bold;
+  color: var(--primary-color);
+  font-weight: bold;
 }
 
 .command {
-    color: var(--text-color);
-    margin-left: 10px;
+  color: var(--text-color);
+  margin-left: 10px;
 }
 
 /* Blinking cursor */
 .cursor {
-    animation: blink 1s step-end infinite;
-    display: none;
+  animation: blink 1s step-end infinite;
+  display: none;
 }
 
 /* Show cursor when terminal is active */
 .cursor.active {
-    display: inline;
+  display: inline;
 }
 
 @keyframes blink {
-    0%, 50% {
-        opacity: 1;
-    }
-    51%, 100% {
-        opacity: 0;
-    }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Blinking indicator */
 .blink {
-    animation: blink 1s step-end infinite;
-    color: var(--primary-color);
+  animation: blink 1s step-end infinite;
+  color: var(--primary-color);
 }
 
 /* Content sections */
 .content-section {
-    margin: 30px 0;
-    padding: 20px 0;
-    border-top: 1px solid var(--secondary-color);
+  margin: 30px 0;
+  padding: 20px 0;
+  border-top: 1px solid var(--secondary-color);
 }
 
 .content-section:first-of-type {
-    border-top: none;
+  border-top: none;
 }
 
 h2 {
-    color: var(--primary-color);
-    font-size: 1.3em;
-    margin-bottom: 15px;
-    letter-spacing: 2px;
-    text-shadow: 0 0 5px var(--shadow-color);
+  color: var(--primary-color);
+  font-size: 1.3em;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px var(--shadow-color);
 }
 
 h3 {
-    color: var(--primary-color);
-    font-size: 1.1em;
-    margin: 15px 0 10px 0;
-    letter-spacing: 1px;
+  color: var(--primary-color);
+  font-size: 1.1em;
+  margin: 15px 0 10px 0;
+  letter-spacing: 1px;
 }
 
 p {
-    margin: 10px 0;
-    color: var(--text-color);
-    font-size: 0.95em;
+  margin: 10px 0;
+  color: var(--text-color);
+  font-size: 0.95em;
 }
 
 /* Project blocks */
 .project {
-    margin: 20px 0;
-    padding-left: 20px;
-    border-left: 3px solid var(--secondary-color);
+  margin: 20px 0;
+  padding-left: 20px;
+  border-left: 3px solid var(--secondary-color);
 }
 
 /* Links */
 a {
-    color: var(--primary-color);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--primary-color);
-    transition: all 0.3s ease;
+  color: var(--primary-color);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--primary-color);
+  transition: all 0.3s ease;
 }
 
 a:hover {
-    color: #fff;
-    border-bottom-color: #fff;
-    text-shadow: 0 0 10px var(--shadow-color);
+  color: #fff;
+  border-bottom-color: #fff;
+  text-shadow: 0 0 10px var(--shadow-color);
 }
 
 /* Scanline effect */
 body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.15),
-        rgba(0, 0, 0, 0.15) 1px,
-        transparent 1px,
-        transparent 2px
-    );
-    pointer-events: none;
-    z-index: 1000;
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 1000;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-    .ascii-logo {
-        font-size: 0.45em;
-    }
+  .ascii-logo {
+    font-size: 0.45em;
+  }
 
-    .container {
-        padding: 10px;
-    }
+  .container {
+    padding: 10px;
+  }
 
-    .terminal-content {
-        padding: 20px;
-    }
+  .terminal-content {
+    padding: 20px;
+  }
 
-    h2 {
-        font-size: 1.1em;
-    }
+  h2 {
+    font-size: 1.1em;
+  }
 
-    .status-bar {
-        font-size: 0.75em;
-    }
+  .status-bar {
+    font-size: 0.75em;
+  }
 }
 
 @media (max-width: 480px) {
-    .ascii-logo {
-        font-size: 0.35em;
-    }
+  .ascii-logo {
+    font-size: 0.35em;
+  }
 
-    .terminal-content {
-        padding: 15px;
-    }
+  .terminal-content {
+    padding: 15px;
+  }
 }
 
 /* Screen flicker effect (subtle) */
 @keyframes flicker {
-    0% {
-        opacity: 0.98;
-    }
-    5% {
-        opacity: 1;
-    }
-    10% {
-        opacity: 0.98;
-    }
-    15% {
-        opacity: 1;
-    }
-    20% {
-        opacity: 0.98;
-    }
-    100% {
-        opacity: 1;
-    }
+  0% {
+    opacity: 0.98;
+  }
+  5% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0.98;
+  }
+  15% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0.98;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .container {
-    animation: flicker 0.15s infinite;
+  animation: flicker 0.15s infinite;
 }

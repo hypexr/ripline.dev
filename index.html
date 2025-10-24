@@ -1,66 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RIPLINE.DEV - Development & Games</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <canvas id="matrix-bg"></canvas>
 
     <div class="container">
-        <header class="terminal-header">
-            <div class="status-bar">
-                <span class="blink">●</span>&nbsp;CONNECTED TO RIPLINE.DEV
-                <span class="float-right" id="clock"></span>
-            </div>
-        </header>
+      <header class="terminal-header">
+        <div class="status-bar">
+          <span class="blink">●</span>&nbsp;CONNECTED TO RIPLINE.DEV
+          <span class="float-right" id="clock"></span>
+        </div>
+      </header>
 
-        <main class="terminal-content">
-            <pre class="ascii-logo">
+      <main class="terminal-content">
+        <pre class="ascii-logo">
 ██████╗ ██╗██████╗ ██╗     ██╗███╗   ██╗███████╗
 ██╔══██╗██║██╔══██╗██║     ██║████╗  ██║██╔════╝
 ██████╔╝██║██████╔╝██║     ██║██╔██╗ ██║█████╗
 ██╔══██╗██║██╔═══╝ ██║     ██║██║╚██╗██║██╔══╝
 ██║  ██║██║██║     ███████╗██║██║ ╚████║███████║
 ╚═╝  ╚═╝╚═╝╚═╝     ╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝
-            </pre>
+            </pre
+        >
 
-            <section class="content-section">
-                <h2>&gt;&gt; APPS</h2>
-                <div class="project">
-                    <h3>I CAN HAS GOAL</h3>
-                    <p>A powerful tool to build better habits and track your progress.</p>
-                    <p>Transform your daily routines into measurable growth.</p>
-                </div>
-            </section>
+        <section class="content-section">
+          <h2>&gt;&gt; APPS</h2>
+          <div class="project">
+            <h3>I CAN HAS GOAL</h3>
+            <p>A powerful tool to build better habits and track your progress.</p>
+            <p>Transform your daily routines into measurable growth.</p>
+          </div>
+        </section>
 
-            <section class="content-section">
-                <h2>&gt;&gt; CONTACT</h2>
-                <p>Interested in our projects? Reach out.</p>
-                <p>Email: <a href="mailto:hello@ripline.dev">hello@ripline.dev</a></p>
-            </section>
+        <section class="content-section">
+          <h2>&gt;&gt; CONTACT</h2>
+          <p>Interested in our projects? Reach out.</p>
+          <p>Email: <a href="mailto:hello@ripline.dev">hello@ripline.dev</a></p>
+        </section>
 
-            <div class="terminal-line">
-                <span class="prompt">kmitnick@ripline:~$</span> <span class="cursor">█</span>
-            </div>
-        </main>
+        <div class="terminal-line">
+          <span class="prompt">kmitnick@ripline:~$</span> <span class="cursor">█</span>
+        </div>
+      </main>
 
-        <!-- Hidden input for mobile keyboard support -->
-        <input type="text" id="mobile-input" style="position: absolute; left: -9999px; opacity: 0;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <!-- Hidden input for mobile keyboard support -->
+      <input
+        type="text"
+        id="mobile-input"
+        style="position: absolute; left: -9999px; opacity: 0"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
 
-        <footer class="terminal-footer">
-            <div class="status-bar">
-                [ RIPLINE © 2025 ]
-            </div>
-        </footer>
+      <footer class="terminal-footer">
+        <div class="status-bar">[ RIPLINE © 2025 ]</div>
+      </footer>
     </div>
 
-    <script src="node_modules/unix-shell-js/index.js"></script>
-    <script src="node_modules/unix-shell-js/vi-editor.js"></script>
+    <script src="node_modules/unix-shell-js/dist/index.js"></script>
+    <script src="node_modules/unix-shell-js/dist/vi-editor.js"></script>
     <script src="ripline-filesystem.js"></script>
     <script src="custom-commands.js"></script>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
