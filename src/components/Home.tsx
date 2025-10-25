@@ -3,7 +3,7 @@ import { UnixShell } from 'unix-shell-js';
 import { createRiplineFileSystem } from '../lib/riplineFilesystem';
 import { customCommands } from '../lib/customCommands';
 
-export default function Main() {
+export default function Home() {
   const [shellInstance, setShellInstance] = useState<any>(null);
   const [currentPrompt, setCurrentPrompt] = useState('kmitnick@ripline:~$');
   const terminalRef = useRef<HTMLDivElement>(null);

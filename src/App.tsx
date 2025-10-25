@@ -1,11 +1,11 @@
 import MatrixBackground from './components/MatrixBackground';
-import Main from './components/Main';
+import Home from './components/Home';
 
 function App() {
   return (
     <>
       <MatrixBackground />
-      <Main />
+      <Home />
     </>
   );
 }
