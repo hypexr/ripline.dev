@@ -1,11 +1,11 @@
 import MatrixBackground from './components/MatrixBackground';
-import Terminal from './components/Terminal';
+import Main from './components/Main';
 
 function App() {
   return (
     <>
       <MatrixBackground />
-      <Terminal />
+      <Main />
     </>
   );
 }

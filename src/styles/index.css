@@ -83,6 +83,7 @@ body {
   flex: 1;
   cursor: text;
   min-height: 400px;
+  overflow-x: hidden;
 }
 
 /* Content is always visible in React version */

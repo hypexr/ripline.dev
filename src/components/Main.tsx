@@ -3,7 +3,7 @@ import { UnixShell } from 'unix-shell-js';
 import { createRiplineFileSystem } from '../lib/riplineFilesystem';
 import { customCommands } from '../lib/customCommands';
 
-export default function Terminal() {
+export default function Main() {
   const [shellInstance, setShellInstance] = useState<any>(null);
   const [currentPrompt, setCurrentPrompt] = useState('kmitnick@ripline:~$');
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -12,35 +12,22 @@ export default function Terminal() {
 
   useEffect(() => {
     // Initialize shell
-    console.log('UnixShell:', UnixShell);
-    console.log('typeof UnixShell:', typeof UnixShell);
+    const shell = new UnixShell({
+      username: 'kmitnick',
+      fileSystem: createRiplineFileSystem(),
+      customCommands: customCommands,
+      persistence: {
+        enabled: true,
+        prefix: 'ripline',
+      },
+    });
 
-    if (!UnixShell) {
-      console.error('UnixShell not available!');
-      return;
-    }
+    setShellInstance(shell);
+    updatePrompt(shell);
 
-    try {
-      const shell = new UnixShell({
-        username: 'kmitnick',
-        fileSystem: createRiplineFileSystem(),
-        customCommands: customCommands,
-        persistence: {
-          enabled: true,
-          prefix: 'ripline',
-        },
-      });
-
-      console.log('Shell initialized:', shell);
-      setShellInstance(shell);
-      updatePrompt(shell);
-
-      // Focus input
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    } catch (error) {
-      console.error('Error initializing shell:', error);
+    // Focus input
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   }, []);
 
@@ -59,12 +46,22 @@ export default function Terminal() {
     setCurrentPrompt(`${user}@ripline:${path}$`);
   };
 
-  const addOutput = (text: string) => {
+  const addOutput = (text: string, className: string = 'terminal-output') => {
     if (!terminalRef.current) return;
 
     const output = document.createElement('div');
-    output.className = 'terminal-output';
-    output.textContent = text;
+    output.className = className;
+
+    // Use <pre> for multi-line output to preserve newlines
+    if (text.includes('\n')) {
+      const pre = document.createElement('pre');
+      pre.textContent = text;
+      pre.style.margin = '0';
+      pre.style.whiteSpace = 'pre-wrap';
+      output.appendChild(pre);
+    } else {
+      output.textContent = text;
+    }
 
     const inputLine = terminalRef.current.querySelector('.terminal-line:last-child');
     if (inputLine) {
@@ -73,9 +70,9 @@ export default function Terminal() {
   };
 
   const handleCommand = (command: string) => {
-    if (!shellInstance || !command.trim()) return;
+    if (!shellInstance) return;
 
-    // Show command with prompt
+    // Show command with prompt (even if empty, like a real terminal)
     const commandLine = document.createElement('div');
     commandLine.className = 'terminal-line terminal-history';
     commandLine.innerHTML = `<span class="prompt">${currentPrompt}</span> ${command}`;
@@ -85,41 +82,71 @@ export default function Terminal() {
       terminalRef.current.insertBefore(commandLine, inputLine);
     }
 
-    // Execute command
-    const output = shellInstance.execute(command);
+    // Only execute if command is not empty
+    if (command.trim()) {
+      // Execute command
+      const output = shellInstance.execute(command);
 
-    // Handle special outputs
-    if (output === '__CLEAR__') {
-      // Clear terminal
-      const outputs = terminalRef.current?.querySelectorAll(
-        '.terminal-output, .terminal-line:not(:last-child)'
-      );
-      outputs?.forEach((el) => el.remove());
-    } else if (output === '__VI_OPENED__') {
-      // Vi editor opened
-    } else if (output && output.startsWith('__USER_SWITCHED__:')) {
-      // User switched
+      // Handle special outputs
+      if (output === '__CLEAR__') {
+        // Clear terminal
+        const outputs = terminalRef.current?.querySelectorAll(
+          '.terminal-output, .terminal-line:not(:last-child)'
+        );
+        outputs?.forEach((el) => el.remove());
+      } else if (output === '__VI_OPENED__') {
+        // Vi editor opened
+      } else if (output && output.startsWith('__USER_SWITCHED__:')) {
+        // User switched
+        updatePrompt(shellInstance);
+      } else if (output) {
+        // Show output
+        addOutput(output);
+      }
+
+      // Update prompt in case path changed
       updatePrompt(shellInstance);
-    } else if (output) {
-      // Show output
-      addOutput(output);
     }
 
-    // Update prompt in case path changed
-    updatePrompt(shellInstance);
-
-    // Scroll to bottom
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
+    // Scroll to bottom of page
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const command = e.currentTarget.value.trim();
-      if (command) {
-        handleCommand(command);
+    // Handle Ctrl+C - cancel current command
+    if (e.key === 'c' && e.ctrlKey) {
+      e.preventDefault();
+
+      const currentInput = e.currentTarget.value;
+
+      // Show the cancelled command with ^C
+      const commandLine = document.createElement('div');
+      commandLine.className = 'terminal-line terminal-history';
+      commandLine.innerHTML = `<span class="prompt">${currentPrompt}</span> ${currentInput}^C`;
+
+      const inputLine = terminalRef.current?.querySelector('.terminal-line:last-child');
+      if (inputLine && terminalRef.current) {
+        terminalRef.current.insertBefore(commandLine, inputLine);
       }
+
+      // Clear the input
+      e.currentTarget.value = '';
+
+      // Scroll to bottom
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth',
+      });
+
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      const command = e.currentTarget.value;
+      handleCommand(command);
       e.currentTarget.value = '';
     } else if (e.key === 'Tab') {
       e.preventDefault();
@@ -151,9 +178,77 @@ export default function Terminal() {
           e.currentTarget.value = parts.join(' ');
         }
       } else if (completions.matches.length > 1) {
-        // Multiple matches - show them
+        // Find common prefix among all matches
+        const findCommonPrefix = (matches: string[]): string => {
+          if (matches.length === 0) return '';
+          const first = matches[0];
+          let commonPrefix = first;
+
+          for (let i = 1; i < matches.length; i++) {
+            let j = 0;
+            while (j < commonPrefix.length && j < matches[i].length && commonPrefix[j] === matches[i][j]) {
+              j++;
+            }
+            commonPrefix = commonPrefix.substring(0, j);
+            if (commonPrefix === '') break;
+          }
+          return commonPrefix;
+        };
+
+        const commonPrefix = findCommonPrefix(completions.matches);
+
+        // Auto-complete to common prefix if it extends beyond what's already typed
+        if (completions.type === 'command') {
+          const currentCmd = partial;
+          if (commonPrefix.length > currentCmd.length) {
+            e.currentTarget.value = commonPrefix;
+          }
+        } else if (completions.type === 'path') {
+          const parts = partial.split(/\s+/);
+          const pathPrefix = completions.prefix;
+
+          // Extract just the filename part being completed
+          let filePrefix = pathPrefix;
+          if (pathPrefix.includes('/')) {
+            const lastSlash = pathPrefix.lastIndexOf('/');
+            filePrefix = pathPrefix.substring(lastSlash + 1);
+          }
+
+          if (commonPrefix.length > filePrefix.length) {
+            // Update with common prefix
+            if (pathPrefix.includes('/')) {
+              const lastSlash = pathPrefix.lastIndexOf('/');
+              const dirPart = pathPrefix.substring(0, lastSlash + 1);
+              parts[parts.length - 1] = dirPart + commonPrefix;
+            } else {
+              parts[parts.length - 1] = commonPrefix;
+            }
+            e.currentTarget.value = parts.join(' ');
+          }
+        }
+
+        // Show all matches
         const matchList = completions.matches.join('  ');
-        addOutput(matchList);
+
+        // Only replace if the previous element before input is tab-completions
+        const inputLine = terminalRef.current?.querySelector('.terminal-line:last-child');
+        const prevElement = inputLine?.previousElementSibling;
+
+        if (prevElement && prevElement.classList.contains('tab-completions')) {
+          // Replace existing completions
+          prevElement.textContent = matchList;
+        } else {
+          // Add blank line before completions for spacing
+          const blankLine = document.createElement('div');
+          blankLine.className = 'terminal-output';
+          blankLine.innerHTML = '&nbsp;';
+          if (inputLine && terminalRef.current) {
+            terminalRef.current.insertBefore(blankLine, inputLine);
+          }
+
+          // Add new completions
+          addOutput(matchList, 'tab-completions');
+        }
       }
     }
   };
