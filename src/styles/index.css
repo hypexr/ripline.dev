@@ -172,12 +172,20 @@ body {
 /* Blinking cursor */
 .cursor {
   animation: blink 1s step-end infinite;
-  display: none;
+  display: inline;
+  color: var(--primary-color);
 }
 
 /* Show cursor when terminal is active */
 .cursor.active {
   display: inline;
+}
+
+/* BBS loading cursor always visible */
+.bbs-loading .cursor {
+  display: inline;
+  animation: none;
+  opacity: 1;
 }
 
 @keyframes blink {

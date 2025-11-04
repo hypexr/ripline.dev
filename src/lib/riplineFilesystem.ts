@@ -4,11 +4,6 @@
 export function createRiplineFileSystem() {
   return {
     '/': {
-      root: {
-        '.bashrc':
-          "# ~/.bashrc: executed by bash for root\n\n# If not running interactively, don't do anything\ncase $- in\n    *i*) ;;\n      *) return;;\nesac\n\n# Prompt for root\nPS1='\\u@\\h:\\w# '\n",
-        '.bash_history': 'ls -la\ncat /etc/shadow\nvi /etc/sudoers\nsystemctl status\n',
-      },
       bin: {
         bash: '[binary]',
         ls: '[binary]',
